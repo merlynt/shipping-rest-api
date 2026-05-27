@@ -5,8 +5,8 @@ Backend del sistema integrado para el control de logística, administración de 
 
 ## Tecnologías y Versiones Utilizadas
 
-* **Framework Base:** .NET 10 (Target Framework: `net10.0`)
-* **SDK Mínimo Requerido:** .NET SDK 10.0.202
+* **Framework Base:** .NET 8.0 (Target Framework: `net10.0`)
+* **SDK Mínimo Requerido:** .NET SDK 8.0
 * **ORM:** Entity Framework Core 10.0.6 (SQL Server)
 * **Documentación de API:** Swashbuckle ASP.NET Core 10.1.7 (OpenAPI 3.1)
 
@@ -16,7 +16,7 @@ Backend del sistema integrado para el control de logística, administración de 
 
 Antes de comenzar, asegúrate de tener instalado en tu máquina local:
 
-1. **SDK de .NET 10** (Es indispensable contar con la versión 10 para evitar conflictos de compilación).
+1. **SDK de .NET 8.0** (Es indispensable contar con la versión 8 para evitar conflictos de compilación).
 2. **SQL Server** o **SQL Server Express**.
 3. **Visual Studio 2026** (con la carga de trabajo de *Desarrollo de ASP.NET y web* instalada).
 
