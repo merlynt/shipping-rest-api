@@ -1,0 +1,26 @@
+## Visual Studio / .NET Core
+[Bb]in/
+[Oo]bj/
+[Log]/
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Sistema Operativo
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+## Paquetes NuGet y Caché
+*.nuget.props
+*.nuget.targets
+project.fragment.lock.json
+project.lock.json
+
+## CONFIGURACIONES LOCALES 
+appsettings.Development.json
+appsettings.Local.json
