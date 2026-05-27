@@ -31,7 +31,6 @@ namespace Infrastructure.Data
                 .Property(e => e.Peso)
                 .HasColumnType("decimal(18,2)");
 
-
             // HACER QUE EL CÓDIGO DE TRACKING SEA ÚNICO E IRREPETIBLE
             modelBuilder.Entity<Envio>()
                 .HasIndex(e => e.CodigoTracking)
@@ -42,7 +41,6 @@ namespace Infrastructure.Data
                 .WithOne(ev => ev.Envio)
                 .HasForeignKey(ev => ev.EnvioId)
                 .OnDelete(DeleteBehavior.Cascade);
-
 
             // Filtros globales para Soft Delete (Ocultamiento en cascada)
             modelBuilder.Entity<Empresa>().HasQueryFilter(e => e.Activo);
@@ -118,6 +116,21 @@ namespace Infrastructure.Data
                     Telefono = "7777-7777",
                     Vehiculo = "Moto",
                     NumeroLicencia = "L123"
+                }
+            );
+
+            // 4. Perfil del Administrador Master (Super Admin)
+            modelBuilder.Entity<Administrador>().HasData(
+                new Administrador
+                {
+                    Id = 1,
+                    Nombre = "Admin",
+                    Apellido = "Central",
+                    Direccion = "Oficina Principal",
+                    Telefono = "2222-0000",
+                    EsMaster = true,
+                    UsuarioId = 1,   
+                    DistritoId = 1 
                 }
             );
         }
