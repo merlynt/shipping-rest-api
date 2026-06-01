@@ -1,12 +1,15 @@
-using Microsoft.OpenApi.Models;
-using Microsoft.EntityFrameworkCore;
-using Infrastructure.Data;
+using System.Text;
 using API.Swagger;
+using Application.Services;
+using Domain.Interfaces;
+using Infrastructure.Data;
+using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +25,9 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<Domain.Interfaces.IUserContext, Infrastructure.Services.UserContext>();
 
 builder.Services.AddScoped<Domain.Interfaces.ITokenService, Infrastructure.Security.TokenService>();
+builder.Services.AddScoped<IDriverService, DriverService>();
+builder.Services.AddScoped<IDriverRepository, DriverRepository>();
+
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

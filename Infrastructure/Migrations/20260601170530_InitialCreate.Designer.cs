@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260527072956_MigracionTotal")]
-    partial class MigracionTotal
+    [Migration("20260601170530_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -66,6 +66,19 @@ namespace Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("Administradores");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Apellido = "Central",
+                            Direccion = "Oficina Principal",
+                            DistritoId = 1,
+                            EsMaster = true,
+                            Nombre = "Admin",
+                            Telefono = "2222-0000",
+                            UsuarioId = 1
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.Departamento", b =>

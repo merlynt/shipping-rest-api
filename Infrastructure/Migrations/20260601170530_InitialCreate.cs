@@ -7,7 +7,7 @@
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class MigracionTotal : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -305,6 +305,11 @@ namespace Infrastructure.Migrations
                     { 2, "empresa@logistica.com", "123456", 2 },
                     { 3, "piloto@logistica.com", "123456", 3 }
                 });
+
+            migrationBuilder.InsertData(
+                table: "Administradores",
+                columns: new[] { "Id", "Apellido", "Direccion", "DistritoId", "EsMaster", "Nombre", "Telefono", "UsuarioId" },
+                values: new object[] { 1, "Central", "Oficina Principal", 1, true, "Admin", "2222-0000", 1 });
 
             migrationBuilder.InsertData(
                 table: "Empresas",
