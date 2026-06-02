@@ -15,5 +15,9 @@ namespace Domain.Interfaces
         Task<Envio?> ObtenerPorTracking(string codigoTracking, int empresaId);
 
         Task<bool> ExisteDestinatario(int id);
+
+        Task<Piloto?> GetByUsuarioIdAsync(int usuarioId);
+
+        Task<IEnumerable<Envio>> GetShipmentsByDriverIdAsync(int driverId);
     }
 }

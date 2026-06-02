@@ -1,104 +1,96 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Domain.Entities;
+﻿using System.Security.Claims;
 using Application.DTOS;
+using Application.Services;
+using Domain.Entities;
 using Domain.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "Empresa")]
+    [Authorize]
     public class ShipmentsController : ControllerBase
     {
-        // 1. Inyectamos la Interfaz del Repositorio
-        private readonly IShipmentRepository _shipmentRepo;
-        private readonly ITrackingService _trackingService;
+        private readonly IShipmentService _shipmentService;
         private readonly IUserContext _userContext;
 
-        public ShipmentsController(IShipmentRepository shipmentRepo, ITrackingService trackingService, IUserContext userContext)
+        public ShipmentsController(IShipmentService shipmentService, IUserContext userContext)
         {
-            _shipmentRepo = shipmentRepo;
-            _trackingService = trackingService;
+            _shipmentService = shipmentService;
             _userContext = userContext;
         }
 
         [HttpPost]
+        [Authorize(Roles = "Empresa")]
         public async Task<IActionResult> Create(CreateEnvioDto dto)
         {
             var empresaId = _userContext.GetUserId();
             if (empresaId == 0) return Unauthorized("No se pudo identificar la empresa.");
 
-            // Validación: ¿Existe el destinatario? (Error 404)
-            var destinatarioExiste = await _shipmentRepo.ExisteDestinatario(dto.DestinatarioId);
-            if (!destinatarioExiste) return NotFound("El destinatario no existe.");
+            var nuevoEnvioDto = await _shipmentService.CrearEnvioAsync(dto, empresaId);
 
-            var envio = new Envio
-            {
-                Peso = dto.Peso,
-                Descripcion = dto.Descripcion,
-                DestinatarioId = dto.DestinatarioId,
-                EstadoId = 1,
-                EmpresaId = empresaId,
-                CodigoTracking = _trackingService.GenerarCodigo()
-            };
+            if (nuevoEnvioDto == null)
+                return NotFound("El destinatario no existe o los datos son inválidos.");
 
-            await _shipmentRepo.Crear(envio);
-
-            // Retorna 201 Created con la ruta para consultar el nuevo envío
-            return CreatedAtAction(nameof(GetByTracking), new { codigoTracking = envio.CodigoTracking }, envio);
+            return CreatedAtAction(nameof(GetByTracking), new { codigoTracking = nuevoEnvioDto.CodigoTracking }, nuevoEnvioDto);
         }
 
         [HttpGet]
+        [Authorize(Roles = "Empresa")]
         public async Task<ActionResult<List<EnvioResponseDto>>> GetAll()
         {
             var empresaId = _userContext.GetUserId();
+            var envios = await _shipmentService.ObtenerTodosPorEmpresaAsync(empresaId);
 
-            // 3. Usamos el repositorio para consultar
-            var envios = await _shipmentRepo.ObtenerTodosPorEmpresa(empresaId);
-
-            return envios.Select(e => new EnvioResponseDto
-            {
-                Id = e.Id,
-                CodigoTracking = e.CodigoTracking,
-                Peso = e.Peso,
-                Descripcion = e.Descripcion,
-                EstadoNombre = e.Estado?.Nombre ?? "Sin Estado", // Manejo nulo preventivo
-                DestinatarioNombre = $"{e.Destinatario?.Nombre} {e.Destinatario?.Apellido}",
-                DestinatarioTelefono = e.Destinatario?.Telefono ?? "",
-                DestinatarioDireccion = e.Destinatario?.Direccion ?? ""
-            }).ToList();
+            return Ok(envios);
         }
 
         [HttpGet("{codigoTracking}")]
+        [Authorize(Roles = "Empresa")]
         public async Task<ActionResult<EnvioResponseDto>> GetByTracking(string codigoTracking)
         {
             var empresaId = _userContext.GetUserId();
-
-            var envio = await _shipmentRepo.ObtenerPorTracking(codigoTracking, empresaId);
+            var envio = await _shipmentService.ObtenerPorTrackingAsync(codigoTracking, empresaId);
 
             if (envio == null)
             {
                 return NotFound("No se encontró el envío o no le pertenece a su empresa.");
             }
 
-        
-            return Ok(new EnvioResponseDto
-            {
-                Id = envio.Id,
-                CodigoTracking = envio.CodigoTracking,
-                Peso = envio.Peso,
-                Descripcion = envio.Descripcion,
-                EstadoNombre = envio.Estado?.Nombre ?? "Sin Estado",
-                DestinatarioNombre = $"{envio.Destinatario?.Nombre} {envio.Destinatario?.Apellido}",
-                DestinatarioTelefono = envio.Destinatario?.Telefono ?? "",
-                DestinatarioDireccion = envio.Destinatario?.Direccion ?? "",
-                Evidencias = envio.Evidencias?.Select(e => new EvidenciaDto
-                {
-                    FirmaUrl = e.FirmaUrl,
-                    FotoUrl = e.FotoUrl
-                }).ToList() ?? new List<EvidenciaDto>()
-            });
+            return Ok(envio);
         }
+
+        /// <summary>
+        /// Obtiene la lista de envíos asignados al piloto (conductor) autenticado.
+        /// </summary>
+        /// <remarks>
+        /// **Rol Requerido:** Piloto.
+        /// Este método extrae el ID del usuario desde los claims del token JWT para buscar su perfil de conductor y sus envíos en ruta.
+        /// </remarks>
+
+        [HttpGet("my-shipments")]
+
+        [Authorize(Roles = "Piloto")]
+        public async Task<IActionResult> GetMyShipments()
+        {
+  
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var usuarioId))
+                return Unauthorized(new { message = "Invalid or missing token claim." });
+
+            try
+            {
+                var shipments = await _shipmentService.GetMyShipmentsAsync(usuarioId);
+                return Ok(shipments);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
     }
 }

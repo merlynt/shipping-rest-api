@@ -1,10 +1,8 @@
+using System.Reflection;
 using System.Text;
 using API.Swagger;
-using Application.Services;
 using Domain.Interfaces;
 using Infrastructure.Data;
-using Infrastructure.Repositories;
-using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -25,8 +23,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<Domain.Interfaces.IUserContext, Infrastructure.Services.UserContext>();
 
 builder.Services.AddScoped<Domain.Interfaces.ITokenService, Infrastructure.Security.TokenService>();
-builder.Services.AddScoped<IDriverService, DriverService>();
-builder.Services.AddScoped<IDriverRepository, DriverRepository>();
+builder.Services.AddScoped<Application.Services.IShipmentService, Application.Services.ShipmentService>();
 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -43,6 +40,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true
         };
     });
+
 
 builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(options =>
@@ -72,6 +70,7 @@ builder.Services.AddSwaggerGen(c =>
         Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
     });
+
     c.AddSecurityRequirement(new OpenApiSecurityRequirement{
         {
             new OpenApiSecurityScheme{
@@ -80,6 +79,10 @@ builder.Services.AddSwaggerGen(c =>
             new string[]{}
         }
     });
+
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
 });
 
 var app = builder.Build();

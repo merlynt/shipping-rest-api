@@ -45,5 +45,17 @@ namespace Infrastructure.Repositories
             // Usamos el _context que ya deberías tener inyectado en el repositorio
             return await _context.Destinatarios.AnyAsync(d => d.Id == id);
         }
+
+        public async Task<Piloto?> GetByUsuarioIdAsync(int usuarioId)
+            => await _context.Pilotos
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.UsuarioId == usuarioId);
+        public async Task<IEnumerable<Envio>> GetShipmentsByDriverIdAsync(int driverId)
+            => await _context.Envios
+                .AsNoTracking()
+                .Where(e => e.PilotoId == (int?)driverId)  
+                .Include(e => e.Destinatario)               
+                .Include(e => e.Estado)                     
+                .ToListAsync();
     }
 }
