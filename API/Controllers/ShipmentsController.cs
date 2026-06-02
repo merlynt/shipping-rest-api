@@ -92,15 +92,10 @@ namespace API.Controllers
             }
         }
         /// <summary>
-        /// Marca un envío como entregado usando su Código de Tracking.
+        /// Para rol piloto y marca un envío como entregado usando su Código
         /// </summary>
         [HttpPatch("{codigoTracking}/deliver")]
         [Authorize(Roles = "Piloto")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         public async Task<IActionResult> Deliver(string codigoTracking, [FromBody] DeliverShipmentDto dto)
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
