@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Application.DTOS;
+using Domain.Constanst;
 using Domain.Entities;
 using Domain.Interfaces;
 
@@ -103,5 +104,36 @@ namespace Application.Services
                 }).ToList() ?? new List<EvidenciaDto>()
             };
         }
-}
+
+        public async Task<bool> EntregarEnvioAsync(string codigoTracking, int usuarioId, DeliverShipmentDto dto)
+        {
+            var envio = await _shipmentRepository.ObtenerPorTrackingAsync(codigoTracking);
+
+            var piloto = await _shipmentRepository.GetByUsuarioIdAsync(usuarioId);
+
+            if (envio == null)
+                throw new KeyNotFoundException($"No se encontró el envío con código: {codigoTracking}");
+
+            if (piloto == null)
+                throw new UnauthorizedAccessException("Tu usuario no tiene un perfil de piloto asignado.");
+
+            if (envio.PilotoId != piloto.Id)
+                throw new UnauthorizedAccessException("Este envío no te pertenece o no lo tienes asignado.");
+
+            if (envio.EstadoId != EstadosEnvios.EnRuta)
+                throw new InvalidOperationException("El envío no está en ruta y no puede ser entregado.");
+
+            envio.EstadoId = EstadosEnvios.Entregado;
+
+            var evidencia = new Evidencia
+            {
+                EnvioId = envio.Id,
+                FirmaUrl = dto.FirmaUrl,
+                FotoUrl = dto.FotoUrl
+            };
+
+            await _shipmentRepository.GuardarEvidenciaYActualizarEstadoAsync(envio, evidencia);
+            return true;
+        }
+    }
 }

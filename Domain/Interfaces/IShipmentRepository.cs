@@ -19,5 +19,10 @@ namespace Domain.Interfaces
         Task<Piloto?> GetByUsuarioIdAsync(int usuarioId);
 
         Task<IEnumerable<Envio>> GetShipmentsByDriverIdAsync(int driverId);
+
+        Task<Envio?> ObtenerPorTrackingAsync(string codigoTracking);
+        Task<Envio?> ObtenerPorIdAsync(int id);
+        Task GuardarEvidenciaYActualizarEstadoAsync(Envio envio, Evidencia evidencia);
+
     }
 }

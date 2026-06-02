@@ -57,5 +57,22 @@ namespace Infrastructure.Repositories
                 .Include(e => e.Destinatario)               
                 .Include(e => e.Estado)                     
                 .ToListAsync();
+        public async Task<Envio?> ObtenerPorIdAsync(int id)
+        {
+            return await _context.Envios.FirstOrDefaultAsync(e => e.Id == id);
+        }
+
+        public async Task GuardarEvidenciaYActualizarEstadoAsync(Envio envio, Evidencia evidencia)
+        {
+            _context.Envios.Update(envio);
+            await _context.Evidencias.AddAsync(evidencia);
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<Envio?> ObtenerPorTrackingAsync(string codigoTracking)
+        {
+            return await _context.Envios.FirstOrDefaultAsync(e => e.CodigoTracking == codigoTracking);
+        }
     }
 }

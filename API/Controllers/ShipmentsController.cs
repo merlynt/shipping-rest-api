@@ -91,6 +91,41 @@ namespace API.Controllers
                 return NotFound(new { message = ex.Message });
             }
         }
+        /// <summary>
+        /// Marca un envío como entregado usando su Código de Tracking.
+        /// </summary>
+        [HttpPatch("{codigoTracking}/deliver")]
+        [Authorize(Roles = "Piloto")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        public async Task<IActionResult> Deliver(string codigoTracking, [FromBody] DeliverShipmentDto dto)
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var driverId))
+                return Unauthorized(new { message = "Token inválido o ausente." });
+
+            try
+            {
+                await _shipmentService.EntregarEnvioAsync(codigoTracking, driverId, dto);
+
+                return Ok(new { message = $"Envío {codigoTracking} marcado como entregado con éxito." });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }
