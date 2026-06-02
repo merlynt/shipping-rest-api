@@ -15,5 +15,7 @@ namespace Application.Services
         Task<EnvioResponseDto?> ObtenerPorTrackingAsync(string codigoTracking, int empresaId);
         Task<IEnumerable<DriverShipmentResponseDto>> GetMyShipmentsAsync(int usuarioId);
         Task<bool> EntregarEnvioAsync(string codigoTracking, int driverId, DeliverShipmentDto dto);
+
+        Task<bool> DevolverEnvioAsync(string codigoTracking, int usuarioId, ReturnShipmentDto dto);
     }
 }

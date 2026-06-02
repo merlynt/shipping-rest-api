@@ -25,5 +25,6 @@ namespace Domain.Entities
         public Piloto? Piloto { get; set; }
 
         public List<Evidencia> Evidencias { get; set; } = new();
+        public string? MotivoDevolucion { get; set; }
     }
 }

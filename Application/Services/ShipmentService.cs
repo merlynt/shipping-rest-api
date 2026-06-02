@@ -135,5 +135,30 @@ namespace Application.Services
             await _shipmentRepository.GuardarEvidenciaYActualizarEstadoAsync(envio, evidencia);
             return true;
         }
+
+        public async Task<bool> DevolverEnvioAsync(string codigoTracking, int usuarioId, ReturnShipmentDto dto)
+        {
+            var envio = await _shipmentRepository.ObtenerPorTrackingAsync(codigoTracking);
+            var piloto = await _shipmentRepository.GetByUsuarioIdAsync(usuarioId);
+
+            if (envio == null)
+                throw new KeyNotFoundException($"No se encontró el envío con código: {codigoTracking}");
+
+            if (piloto == null)
+                throw new UnauthorizedAccessException("Tu usuario no tiene un perfil de piloto asignado.");
+
+            if (envio.PilotoId != piloto.Id)
+                throw new UnauthorizedAccessException("Este envío no te pertenece.");
+
+            if (envio.EstadoId != Domain.Constanst.EstadosEnvios.EnRuta)
+                throw new InvalidOperationException("El envío no está en ruta y no puede ser devuelto.");
+
+            envio.EstadoId = Domain.Constanst.EstadosEnvios.Devolucion;
+            envio.MotivoDevolucion = dto.Motivo;
+
+            await _shipmentRepository.ActualizarAsync(envio);
+
+            return true;
+        }
     }
 }

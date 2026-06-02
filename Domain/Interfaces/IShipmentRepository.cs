@@ -24,5 +24,7 @@ namespace Domain.Interfaces
         Task<Envio?> ObtenerPorIdAsync(int id);
         Task GuardarEvidenciaYActualizarEstadoAsync(Envio envio, Evidencia evidencia);
 
+        Task ActualizarAsync(Envio envio);
+
     }
 }

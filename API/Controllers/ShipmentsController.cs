@@ -122,5 +122,36 @@ namespace API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [HttpPatch("{codigoTracking}/return")]
+        [Authorize(Roles = "Piloto")]
+        /// <summary>
+        /// Para rol piloto y marca un envío como devuelto usando su Código
+        /// </summary>
+        public async Task<IActionResult> ReturnShipment(string codigoTracking, [FromBody] ReturnShipmentDto dto)
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var usuarioId))
+                return Unauthorized(new { message = "Token inválido o ausente." });
+
+            try
+            {
+                await _shipmentService.DevolverEnvioAsync(codigoTracking, usuarioId, dto);
+                return Ok(new { message = "El envío ha sido marcado como Devolución exitosamente." });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return UnprocessableEntity(new { message = ex.Message });
+            }
+        }
     }
 }

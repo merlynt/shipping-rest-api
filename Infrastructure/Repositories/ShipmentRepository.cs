@@ -74,5 +74,10 @@ namespace Infrastructure.Repositories
         {
             return await _context.Envios.FirstOrDefaultAsync(e => e.CodigoTracking == codigoTracking);
         }
+        public async Task ActualizarAsync(Envio envio)
+        {
+            _context.Envios.Update(envio);
+            await _context.SaveChangesAsync();
+        }
     }
 }
