@@ -34,7 +34,7 @@ namespace Infrastructure.Repositories
         public async Task<Envio?> ObtenerPorTracking(string codigoTracking, int empresaId)
         {
             return await _context.Envios
-                .Include(e => e.Evidencias) 
+                .Include(e => e.Evidencias)
                 .Include(e => e.Destinatario)
                 .Include(e => e.Estado)
                 .FirstOrDefaultAsync(e => e.CodigoTracking == codigoTracking && e.EmpresaId == empresaId);
@@ -46,34 +46,65 @@ namespace Infrastructure.Repositories
             return await _context.Destinatarios.AnyAsync(d => d.Id == id);
         }
 
-        public async Task<Piloto?> GetByUsuarioIdAsync(int usuarioId)
-            => await _context.Pilotos
-                .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.UsuarioId == usuarioId);
-        public async Task<IEnumerable<Envio>> GetShipmentsByDriverIdAsync(int driverId)
-            => await _context.Envios
-                .AsNoTracking()
-                .Where(e => e.PilotoId == (int?)driverId)  
-                .Include(e => e.Destinatario)               
-                .Include(e => e.Estado)                     
-                .ToListAsync();
-        public async Task<Envio?> ObtenerPorIdAsync(int id)
+        public async Task<Envio?> ObtenerPorId(int id)
         {
-            return await _context.Envios.FirstOrDefaultAsync(e => e.Id == id);
+            return await _context.Envios
+                .Include(e => e.Estado)
+                .Include(e => e.Piloto)
+                .Include(e => e.Destinatario)
+                .FirstOrDefaultAsync(e => e.Id == id);
         }
 
-        public async Task GuardarEvidenciaYActualizarEstadoAsync(Envio envio, Evidencia evidencia)
+        public async Task<Envio> Actualizar(Envio envio)
         {
             _context.Envios.Update(envio);
-            await _context.Evidencias.AddAsync(evidencia);
-
             await _context.SaveChangesAsync();
+            return envio;
+        }
+
+        public async Task<bool> ExistePiloto(int pilotoId)
+        {
+            return await _context.Pilotos.AnyAsync(p => p.Id == pilotoId);
+        }
+
+        public async Task<Piloto?> GetByUsuarioIdAsync(int usuarioId)
+        {
+            return await _context.Pilotos
+                .FirstOrDefaultAsync(p => p.UsuarioId == usuarioId);
+        }
+
+        public async Task<IEnumerable<Envio>> GetShipmentsByDriverIdAsync(int driverId)
+        {
+            return await _context.Envios
+                .Include(e => e.Estado)
+                .Include(e => e.Destinatario)
+                .Where(e => e.PilotoId == driverId)
+                .ToListAsync();
         }
 
         public async Task<Envio?> ObtenerPorTrackingAsync(string codigoTracking)
         {
-            return await _context.Envios.FirstOrDefaultAsync(e => e.CodigoTracking == codigoTracking);
+            return await _context.Envios
+                .Include(e => e.Estado)
+                .Include(e => e.Destinatario)
+                .FirstOrDefaultAsync(e => e.CodigoTracking == codigoTracking);
         }
+
+        public async Task<Envio?> ObtenerPorIdAsync(int id)
+        {
+            return await _context.Envios
+                .Include(e => e.Estado)
+                .Include(e => e.Destinatario)
+                .FirstOrDefaultAsync(e => e.Id == id);
+        }
+
+        public async Task GuardarEvidenciaYActualizarEstadoAsync(Envio envio, Evidencia evidencia)
+        {
+            _context.Evidencias.Add(evidencia);
+            _context.Envios.Update(envio);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task ActualizarAsync(Envio envio)
         {
             _context.Envios.Update(envio);

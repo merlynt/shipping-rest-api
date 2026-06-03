@@ -21,6 +21,7 @@ builder.Services.AddScoped<Domain.Interfaces.IRecipientRepository, Infrastructur
 builder.Services.AddScoped<Domain.Interfaces.IUsuarioRepository, Infrastructure.Repositories.UsuarioRepository>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<Domain.Interfaces.IUserContext, Infrastructure.Services.UserContext>();
+builder.Services.AddScoped<Domain.Interfaces.IDriverRepository, Infrastructure.Repositories.DriverRepository>();
 
 builder.Services.AddScoped<Domain.Interfaces.ITokenService, Infrastructure.Security.TokenService>();
 builder.Services.AddScoped<Application.Services.IShipmentService, Application.Services.ShipmentService>();
