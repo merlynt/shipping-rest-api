@@ -82,12 +82,15 @@ namespace API.Controllers
             });
         }
 
-        [HttpPut("shipments/{shipmentId}/assign")]
+        [HttpPatch("shipments/{shipmentId}/assign")]
         public async Task<IActionResult> AssignShipment(int shipmentId, [FromBody] AssignDriverDto dto)
         {
             var envio = await _shipmentRepo.ObtenerPorId(shipmentId);
             if (envio == null)
                 return NotFound($"No se encontró el envío con ID {shipmentId}.");
+
+            if (envio.PilotoId != null || envio.EstadoId == ESTADO_EN_RUTA_ID)
+                return Conflict("El envío ya tiene un driver asignado o ya está en ruta.");
 
             var pilotoExiste = await _shipmentRepo.ExistePiloto(dto.PilotoId);
             if (!pilotoExiste)
