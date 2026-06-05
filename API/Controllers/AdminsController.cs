@@ -1,5 +1,5 @@
 using Application.DTOS;
-using Application.Services;
+using Application.Interfaces; // <-- CORREGIDO: Ahora apunta a la nueva ubicación
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,21 +23,35 @@ namespace API.Controllers
             try
             {
                 var admin = await _adminService.CrearAdministradorAsync(dto);
-
-                return CreatedAtAction(
-                    nameof(Create),
-                    new { id = admin.Id },
-                    admin);
+                return CreatedAtAction(nameof(Create), new { id = admin.Id }, admin);
             }
-            catch (InvalidOperationException ex)
-                when (ex.Message == "EMAIL_EXISTE")
+            catch (InvalidOperationException ex) when (ex.Message == "EMAIL_EXISTE")
             {
                 return Conflict("El email ya existe.");
             }
-            catch (ArgumentException ex)
-                when (ex.Message == "DISTRITO_NO_EXISTE")
+            catch (ArgumentException ex) when (ex.Message == "DISTRITO_NO_EXISTE")
             {
                 return BadRequest("El distrito no existe.");
+            }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateAdminDto dto)
+        {
+            try
+            {
+                var fueActualizado = await _adminService.ActualizarAdministradorAsync(id, dto);
+
+                if (!fueActualizado)
+                {
+                    return NotFound(new { message = $"No se encontró el administrador con ID {id}" });
+                }
+
+                return Ok(new { message = "Administrador actualizado correctamente." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocurrió un error al actualizar el administrador.", details = ex.Message });
             }
         }
     }
