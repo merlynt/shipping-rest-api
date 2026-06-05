@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Domain.Interfaces;
 
 namespace Domain.Entities
 {
-    public class Administrador
+    public class Administrador : ISoftDelete
     {
         public int Id { get; set; }
         public string Nombre { get; set; } = string.Empty;
@@ -21,5 +22,7 @@ namespace Domain.Entities
 
         public int DistritoId { get; set; }
         public Distrito Distrito { get; set; } = null!;
+        public bool IsDeleted { get; set; } = false;
+        public DateTime? DeletedAt { get; set; }
     }
 }
