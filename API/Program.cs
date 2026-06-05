@@ -11,6 +11,10 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+Console.WriteLine("ENTORNO = " + builder.Environment.EnvironmentName);
+Console.WriteLine("CONEXION = " +
+    builder.Configuration.GetConnectionString("CadenaConexion"));
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("CadenaConexion")));
 
@@ -19,6 +23,8 @@ builder.Services.AddScoped<Domain.Interfaces.ITrackingService, Application.Servi
 builder.Services.AddScoped<Domain.Interfaces.IShipmentRepository, Infrastructure.Repositories.ShipmentRepository>();
 builder.Services.AddScoped<Domain.Interfaces.IRecipientRepository, Infrastructure.Repositories.RecipientRepository>();
 builder.Services.AddScoped<Domain.Interfaces.IUsuarioRepository, Infrastructure.Repositories.UsuarioRepository>();
+builder.Services.AddScoped<Domain.Interfaces.IAdminRepository, Infrastructure.Repositories.AdminRepository>();
+builder.Services.AddScoped<Application.Services.IAdminService, Application.Services.AdminService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<Domain.Interfaces.IUserContext, Infrastructure.Services.UserContext>();
 
