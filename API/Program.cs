@@ -24,7 +24,7 @@ builder.Services.AddScoped<Domain.Interfaces.IShipmentRepository, Infrastructure
 builder.Services.AddScoped<Domain.Interfaces.IRecipientRepository, Infrastructure.Repositories.RecipientRepository>();
 builder.Services.AddScoped<Domain.Interfaces.IUsuarioRepository, Infrastructure.Repositories.UsuarioRepository>();
 builder.Services.AddScoped<Domain.Interfaces.IAdminRepository, Infrastructure.Repositories.AdminRepository>();
-builder.Services.AddScoped<Application.Services.IAdminService, Application.Services.AdminService>();
+builder.Services.AddScoped<Application.Interfaces.IAdminService, Application.Services.AdminService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<Domain.Interfaces.IUserContext, Infrastructure.Services.UserContext>();
 

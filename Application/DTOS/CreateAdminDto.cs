@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace Application.DTOS
@@ -26,6 +27,7 @@ namespace Application.DTOS
         [Required]
         public int DistritoId { get; set; }
 
+        [DefaultValue(false)]
         public bool EsMaster { get; set; }
     }
 }

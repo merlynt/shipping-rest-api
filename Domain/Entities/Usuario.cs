@@ -13,5 +13,8 @@ namespace Domain.Entities
         // Relación: Un usuario tiene un rol (Admin, Empresa o Piloto)
         public int RolId { get; set; }
         public Rol Rol { get; set; } = null!;
+
+        public bool Activo { get; set; } = true;
+
     }
 }

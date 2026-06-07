@@ -26,33 +26,60 @@ namespace Infrastructure.Repositories
 
         public async Task<Administrador> CrearAdministrador(Administrador administrador, Usuario usuario)
         {
-            _context.Usuarios.Add(usuario);
-            await _context.SaveChangesAsync();
-
-            administrador.UsuarioId = usuario.Id;
-
+           
+            administrador.Usuario = usuario;
             _context.Administradores.Add(administrador);
             await _context.SaveChangesAsync();
 
-            return administrador;
+            var administradorCreado = await _context.Administradores
+                .Include(a => a.Distrito)
+                .Include(a => a.Usuario)
+                    .ThenInclude(u => u.Rol)
+                .FirstAsync(a => a.Id == administrador.Id);
+
+          
+            return administradorCreado;
         }
 
-        // --- NUEVOS MÉTODOS PARA EDICIÓN ---
+    
 
         public async Task<Administrador?> GetByIdAsync(int id)
         {
-            // Incluimos el Usuario para poder modificarlo cuando el admin sea actualizado
+            
             return await _context.Administradores
-                .Include(a => a.Usuario) 
+                .Include(a => a.Distrito)
+                .Include(a => a.Usuario)
+                    .ThenInclude(u => u.Rol) 
                 .FirstOrDefaultAsync(a => a.Id == id);
         }
 
         public async Task ActualizarAdministrador(Administrador administrador)
         {
-            // Entity Framework rastrea los cambios realizados en el objeto 'administrador'
-            // y en su propiedad de navegación 'Usuario'
-            _context.Administradores.Update(administrador);
-            await _context.SaveChangesAsync();
+           
+            var adminExistente = await _context.Administradores
+                .Include(a => a.Usuario)
+                .FirstOrDefaultAsync(a => a.Id == administrador.Id);
+
+            if (adminExistente != null)
+            {
+                
+                adminExistente.Nombre = administrador.Nombre;
+                adminExistente.Apellido = administrador.Apellido;
+                adminExistente.Direccion = administrador.Direccion;
+                adminExistente.Telefono = administrador.Telefono;
+                adminExistente.EsMaster = administrador.EsMaster;
+                adminExistente.DistritoId = administrador.DistritoId;
+
+               
+                if (adminExistente.Usuario != null && administrador.Usuario != null)
+                {
+                    adminExistente.Usuario.Email = administrador.Usuario.Email;
+                    adminExistente.Usuario.RolId = administrador.Usuario.RolId;
+                    adminExistente.Usuario.Activo = administrador.Usuario.Activo;
+                }
+
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }
