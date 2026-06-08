@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Application.DTOS;
+using Application.Interfaces;
 using Domain.Constanst;
 using Domain.Entities;
 using Domain.Interfaces;
@@ -160,5 +161,35 @@ namespace Application.Services
 
             return true;
         }
+        public async Task<DriverShipmentDetail> ObtenerDetalleEnvioParaDriverAsync(int shipmentId, int usuarioId)
+        {
+            var piloto = await _shipmentRepository.GetByUsuarioIdAsync(usuarioId)
+                ?? throw new KeyNotFoundException($"No se encontró un perfil de piloto para el usuario {usuarioId}.");
+
+            var envio = await _shipmentRepository.ObtenerConDetallesAsync(shipmentId)
+                ?? throw new KeyNotFoundException("El envío no existe.");
+
+            if (envio.PilotoId != piloto.Id)
+            {
+                throw new UnauthorizedAccessException("Este envío no te pertenece o no lo tienes asignado.");
+            }
+
+     
+            return new DriverShipmentDetail
+            {
+                Id = envio.Id,
+                CodigoTracking = envio.CodigoTracking,
+                Estado = envio.Estado?.Nombre ?? string.Empty,
+                DestinatarioNombre = $"{envio.Destinatario?.Nombre} {envio.Destinatario?.Apellido}".Trim(),
+                Direccion = envio.Destinatario?.Direccion ?? string.Empty,
+                Telefono = envio.Destinatario?.Telefono ?? string.Empty,
+                Peso = envio.Peso,
+                Descripcion = envio.Descripcion,
+                Distrito = envio.Destinatario?.Distrito?.Nombre ?? string.Empty,
+                Departamento = envio.Destinatario?.Distrito?.Departamento?.Nombre ?? string.Empty
+            };
+        }
+
+        
     }
 }

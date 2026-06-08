@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Application.DTOS;
 
-namespace Application.Services
+namespace Application.Interfaces
 {
     public interface IShipmentService
     {
@@ -17,5 +17,8 @@ namespace Application.Services
         Task<bool> EntregarEnvioAsync(string codigoTracking, int driverId, DeliverShipmentDto dto);
 
         Task<bool> DevolverEnvioAsync(string codigoTracking, int usuarioId, ReturnShipmentDto dto);
+
+        Task<DriverShipmentDetail> ObtenerDetalleEnvioParaDriverAsync(int shipmentId, int usuarioId);
+
     }
 }

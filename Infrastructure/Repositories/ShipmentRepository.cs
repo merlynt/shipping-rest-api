@@ -45,7 +45,7 @@ namespace Infrastructure.Repositories
             // Usamos el _context que ya deberías tener inyectado en el repositorio
             return await _context.Destinatarios.AnyAsync(d => d.Id == id);
         }
-
+        //Estos los ocupa el Kevin y por alguna razon es´t
         public async Task<Envio?> ObtenerPorId(int id)
         {
             return await _context.Envios
@@ -110,5 +110,15 @@ namespace Infrastructure.Repositories
             _context.Envios.Update(envio);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<Envio?> ObtenerConDetallesAsync(int id)
+        {
+            return await _context.Envios
+                .Include(e => e.Destinatario)
+                    .ThenInclude(d => d.Distrito)
+                        .ThenInclude(dist => dist.Departamento)
+                .FirstOrDefaultAsync(e => e.Id == id);
+        }
+
     }
 }

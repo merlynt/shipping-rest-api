@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 using Application.DTOS;
-using Application.Services;
+using Application.Interfaces;
 using Domain.Entities;
 using Domain.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -70,8 +70,7 @@ namespace API.Controllers
         /// Este método extrae el ID del usuario desde los claims del token JWT para buscar su perfil de conductor y sus envíos en ruta.
         /// </remarks>
 
-        [HttpGet("my-shipments")]
-
+        [HttpGet("assigned-shipments")]
         [Authorize(Roles = "Piloto")]
         public async Task<IActionResult> GetMyShipments()
         {
@@ -153,5 +152,33 @@ namespace API.Controllers
                 return UnprocessableEntity(new { message = ex.Message });
             }
         }
+
+        /// <summary>
+        /// Para rol piloto. Obtiene el detalle completo de un envío asignado por su ID.
+        /// </summary>
+        [HttpGet("{id:int}")]
+        [Authorize(Roles = "Piloto")] // Asegúrate de usar el nombre exacto de tu rol
+        public async Task<IActionResult> GetShipmentDetail(int id)
+        {
+            var userIdClaim = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var usuarioId))
+                return Unauthorized(new { message = "Token inválido o ausente." });
+
+            try
+            {
+                var result = await _shipmentService.ObtenerDetalleEnvioParaDriverAsync(id, usuarioId);
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
     }
 }
