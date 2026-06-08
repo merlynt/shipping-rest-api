@@ -4,9 +4,9 @@ namespace Domain.Interfaces
 {
     public interface ICompanyRepository
     {
-        Task<bool> ExisteCode(string code);
+        Task<bool> ExisteCodigoAsync(string codigo);
+        Task<bool> ExisteDistritoAsync(int distritoId);
         Task<bool> ExisteEmail(string email);
-        Task<bool> ExisteDistrito(int distritoId);
-        Task<Company> RegistrarEmpresa(Company empresa, Usuario usuario);
+        Task<Empresa> CrearEmpresa(Empresa empresa, Usuario usuario);
     }
 }

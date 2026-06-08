@@ -31,6 +31,10 @@ builder.Services.AddScoped<Domain.Interfaces.IUserContext, Infrastructure.Servic
 builder.Services.AddScoped<Domain.Interfaces.IDriverRepository, Infrastructure.Repositories.DriverRepository>();
 
 builder.Services.AddScoped<Domain.Interfaces.ITokenService, Infrastructure.Security.TokenService>();
+
+builder.Services.AddScoped<Domain.Interfaces.ICompanyRepository, Infrastructure.Repositories.CompanyRepository>();
+builder.Services.AddScoped<Application.Interfaces.ICompanyService, Application.Services.CompanyService>();
+
 builder.Services.AddScoped<Application.Interfaces.IShipmentService, Application.Services.ShipmentService>();
 
 

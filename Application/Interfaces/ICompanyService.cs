@@ -5,6 +5,6 @@ namespace Application.Interfaces
 {
     public interface ICompanyService
     {
-        Task<Company> RegistrarEmpresaAsync(CreateCompanyDto dto);
+        Task<CompanyDto> CrearEmpresaAsync(CreateCompanyDto  dto);
     }
 }
