@@ -8,5 +8,7 @@ namespace Domain.Interfaces
         Task<bool> ExisteDistritoAsync(int distritoId);
         Task<bool> ExisteEmail(string email);
         Task<Empresa> CrearEmpresa(Empresa empresa, Usuario usuario);
+        Task<Empresa?> ObtenerPorIdConUsuarioAsync(int id);
+        Task ActualizarEmpresaAsync(Empresa empresa);
     }
 }

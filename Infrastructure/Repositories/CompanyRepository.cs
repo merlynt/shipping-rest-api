@@ -48,7 +48,19 @@ namespace Infrastructure.Repositories
 
             return empresaCreada;
         }
+        public async Task<Empresa?> ObtenerPorIdConUsuarioAsync(int id)
+        {
+            return await _context.Empresas
+                .IgnoreQueryFilters()
+                .Include(e => e.Usuario) 
+                .FirstOrDefaultAsync(e => e.Id == id);
+        }
 
-        
+        public async Task ActualizarEmpresaAsync(Empresa empresa)
+        {
+            _context.Empresas.Update(empresa);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }

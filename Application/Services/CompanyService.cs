@@ -60,6 +60,60 @@ namespace Application.Services
                 UsernameCreado = empresaCreada.Usuario.Email 
             };
         }
+
+        public async Task<bool> DesactivarEmpresaAsync(int id)
+        {
+            var empresa = await _companyRepository.ObtenerPorIdConUsuarioAsync(id);
+
+           
+            if (empresa == null)
+            {
+                throw new KeyNotFoundException($"No se encontró la empresa con el ID {id}.");
+            }
+
+            if (!empresa.Activo)
+            {
+                throw new InvalidOperationException("La empresa ya se encuentra inactiva.");
+            }
+
+            empresa.Activo = false;
+
+            if (empresa.Usuario != null)
+            {
+                empresa.Usuario.Activo = false;
+            }
+
+            await _companyRepository.ActualizarEmpresaAsync(empresa);
+
+            return true;
+        }
+
+        public async Task<bool> ActivarEmpresaAsync(int id)
+        {
+            var empresa = await _companyRepository.ObtenerPorIdConUsuarioAsync(id);
+
+            if (empresa == null)
+            {
+                throw new KeyNotFoundException($"No se encontró la empresa con el ID {id}.");
+            }
+
+            if (empresa.Activo)
+            {
+                throw new InvalidOperationException("La empresa ya se encuentra activa en el sistema.");
+            }
+
+            empresa.Activo = true;
+
+            if (empresa.Usuario != null)
+            {
+                empresa.Usuario.Activo = true;
+            }
+
+            await _companyRepository.ActualizarEmpresaAsync(empresa);
+
+            return true;
+        }
+
     }
 
 }
