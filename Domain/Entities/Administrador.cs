@@ -22,7 +22,6 @@ namespace Domain.Entities
 
         public int DistritoId { get; set; }
         public Distrito Distrito { get; set; } = null!;
-        public bool IsDeleted { get; set; } = false;
-        public DateTime? DeletedAt { get; set; }
+       
     }
 }

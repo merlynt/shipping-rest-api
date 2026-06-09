@@ -110,5 +110,44 @@ namespace Infrastructure.Repositories
             _context.Envios.Update(envio);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<Envio?> ObtenerConDetallesAsync(int id)
+        {
+            return await _context.Envios
+                .Include(e => e.Destinatario)
+                    .ThenInclude(d => d.Distrito)
+                        .ThenInclude(dist => dist.Departamento)
+                .FirstOrDefaultAsync(e => e.Id == id);
+        }
+
+        public async Task<List<Envio>> ObtenerEnviosConDetallesPorEmpresaAsync(int empresaId)
+        {
+            return await _context.Envios
+                .Where(e => e.EmpresaId == empresaId)
+                .Include(e => e.Estado)
+                .Include(e => e.Destinatario)
+                .Include(e => e.Empresa)
+                .Include(e => e.Piloto)  
+                .ToListAsync();
+        }
+
+        // Ruta: Infrastructure/Repositories/ShipmentRepository.cs
+
+        public async Task<List<Envio>> ObtenerReportePorEstadoAsync(int? statusId)
+        {
+            var query = _context.Envios
+                .Include(e => e.Estado)
+                .Include(e => e.Destinatario)
+                .Include(e => e.Empresa)
+                .Include(e => e.Piloto)
+                .AsQueryable();
+
+            if (statusId.HasValue)
+            {
+                query = query.Where(e => e.EstadoId == statusId.Value);
+            }
+
+            return await query.ToListAsync();
+        }
     }
 }

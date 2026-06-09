@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Application.DTOS;
+using Application.Interfaces;
 using Domain.Constanst;
 using Domain.Entities;
 using Domain.Interfaces;
@@ -14,11 +15,13 @@ namespace Application.Services
     {
         private readonly IShipmentRepository _shipmentRepository;
         private readonly ITrackingService _trackingService;
+        private readonly ICompanyRepository _companyRepository;
 
-        public ShipmentService(IShipmentRepository shipmentRepository, ITrackingService trackingService)
+        public ShipmentService(IShipmentRepository shipmentRepository, ITrackingService trackingService, ICompanyRepository companyRepository)
         {
             _shipmentRepository = shipmentRepository;
             _trackingService = trackingService;
+            _companyRepository = companyRepository;
         }
 
         async Task<IEnumerable<DriverShipmentResponseDto>> IShipmentService.GetMyShipmentsAsync(int usuarioId)
@@ -255,5 +258,79 @@ namespace Application.Services
                 NombrePiloto = envio.Piloto != null ? envio.Piloto.Nombre : "No asignado"
             };
         }
+        public async Task<DriverShipmentDetail> ObtenerDetalleEnvioParaDriverAsync(int shipmentId, int usuarioId)
+        {
+            var piloto = await _shipmentRepository.GetByUsuarioIdAsync(usuarioId)
+                ?? throw new KeyNotFoundException($"No se encontró un perfil de piloto para el usuario {usuarioId}.");
+
+            var envio = await _shipmentRepository.ObtenerConDetallesAsync(shipmentId)
+                ?? throw new KeyNotFoundException("El envío no existe.");
+
+            if (envio.PilotoId != piloto.Id)
+            {
+                throw new UnauthorizedAccessException("Este envío no te pertenece o no lo tienes asignado.");
+            }
+
+     
+            return new DriverShipmentDetail
+            {
+                Id = envio.Id,
+                CodigoTracking = envio.CodigoTracking,
+                Estado = envio.Estado?.Nombre ?? string.Empty,
+                DestinatarioNombre = $"{envio.Destinatario?.Nombre} {envio.Destinatario?.Apellido}".Trim(),
+                Direccion = envio.Destinatario?.Direccion ?? string.Empty,
+                Telefono = envio.Destinatario?.Telefono ?? string.Empty,
+                Peso = envio.Peso,
+                Descripcion = envio.Descripcion,
+                Distrito = envio.Destinatario?.Distrito?.Nombre ?? string.Empty,
+                Departamento = envio.Destinatario?.Distrito?.Departamento?.Nombre ?? string.Empty
+            };
+        }
+
+        public async Task<List<ShipmentReportDto>> ObtenerReporteAdminPorEmpresaAsync(int empresaId)
+        {
+            var empresaExiste = await _companyRepository.ObtenerPorIdConUsuarioAsync(empresaId);
+
+            if (empresaExiste == null)
+            {
+                throw new KeyNotFoundException($"No se encontró ninguna empresa registrada con el ID {empresaId}.");
+            }
+
+            var envios = await _shipmentRepository.ObtenerEnviosConDetallesPorEmpresaAsync(empresaId);
+
+            var enviosDto = envios.Select(e => new ShipmentReportDto
+            {
+                Id = e.Id,
+                CodigoTracking = e.CodigoTracking,
+                Peso = e.Peso,
+                Descripcion = e.Descripcion,
+                EstadoNombre = e.Estado?.Nombre ?? "Sin Estado",
+                DestinatarioNombre = e.Destinatario?.Nombre ?? "Sin Destinatario",
+                EmpresaNombre = e.Empresa?.NombreEmpresa ?? "Empresa Desconocida",
+                PilotoNombre = e.Piloto?.Nombre ?? "No se ha asignado",
+                MotivoDevolucion = e.MotivoDevolucion ?? "No aplica",
+            }).ToList();
+
+            return enviosDto;
+        }
+
+        public async Task<List<ShipmentReportDto>> ObtenerReporteAdminPorEstadoAsync(int? statusId)
+        {
+            var envios = await _shipmentRepository.ObtenerReportePorEstadoAsync(statusId);
+
+            return envios.Select(e => new ShipmentReportDto
+            {
+                Id = e.Id,
+                CodigoTracking = e.CodigoTracking,
+                Peso = e.Peso,
+                Descripcion = e.Descripcion,
+                EstadoNombre = e.Estado?.Nombre ?? "Sin Estado",
+                DestinatarioNombre = e.Destinatario?.Nombre ?? "Sin Destinatario",
+                EmpresaNombre = e.Empresa?.NombreEmpresa ?? "Empresa Desconocida",
+                PilotoNombre = e.Piloto?.Nombre ?? "No se ha asignado",
+                MotivoDevolucion = e.MotivoDevolucion ?? "N/A"
+            }).ToList();
+        }
+
     }
 }
