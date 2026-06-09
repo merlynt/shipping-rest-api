@@ -20,5 +20,7 @@ namespace Application.Interfaces
 
         Task<DriverShipmentDetail> ObtenerDetalleEnvioParaDriverAsync(int shipmentId, int usuarioId);
 
+        Task<List<ShipmentReportDto>> ObtenerReporteAdminPorEmpresaAsync(int empresaId);
+
     }
 }

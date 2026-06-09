@@ -190,6 +190,39 @@ namespace Application.Services
             };
         }
 
-        
+        public async Task<List<ShipmentReportDto>> ObtenerReporteAdminPorEmpresaAsync(int empresaId)
+        {
+            var empresa = await _shipmentRepository.ObtenerTodosPorEmpresa(empresaId);
+
+            if (empresa == null)
+            {
+           
+                throw new KeyNotFoundException($"No se encontró ninguna empresa registrada con el ID {empresaId}.");
+            }
+
+          
+            var envios = await _shipmentRepository.ObtenerTodosPorEmpresa(empresaId);
+
+
+            var enviosDto = envios.Select(e => new ShipmentReportDto
+            {
+                Id = e.Id,
+                CodigoTracking = e.CodigoTracking,
+                Peso = e.Peso,
+                Descripcion = e.Descripcion,
+
+                EstadoNombre = e.Estado?.Nombre ?? "Sin Estado",
+                DestinatarioNombre = e.Destinatario?.Nombre ?? "Sin Destinatario",
+                EmpresaNombre = e.Empresa?.NombreEmpresa ?? "Empresa Desconocida",
+
+                // Suponiendo que tu entidad Piloto tiene una propiedad llamada "Nombre"
+                PilotoNombre = e.Piloto?.Nombre,
+
+                MotivoDevolucion = e.MotivoDevolucion
+            }).ToList();
+
+            return enviosDto;
+        }
+
     }
 }

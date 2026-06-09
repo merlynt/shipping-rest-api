@@ -30,8 +30,5 @@ namespace Domain.Interfaces
         Task<Envio> Actualizar(Envio envio);
         Task<bool> ExistePiloto(int pilotoId);
 
-        Task<Envio?> ObtenerConDetallesAsync(int id);
-
-
     }
 }
