@@ -24,5 +24,9 @@ namespace Application.Interfaces
 
         Task<List<ShipmentReportDto>> ObtenerReporteAdminPorEstadoAsync(int? statusId);
 
+        
+        Task<EnvioResponseDto?> ActualizarShipmentAsync(int id, UpdateShipmentDto dto);
+        Task<EnvioResponseDto?> CambiarEstadoAsync(int id, UpdateShipmentStatusDto dto);
+        Task<EnvioResponseDto?> MarcarEnBodegaAsync(int id);
     }
 }

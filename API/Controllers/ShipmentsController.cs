@@ -71,6 +71,8 @@ namespace API.Controllers
         /// </remarks>
 
         [HttpGet("assigned-shipments")]
+        [HttpGet("my-shipments")]
+
         [Authorize(Roles = "Piloto")]
         public async Task<IActionResult> GetMyShipments()
         {
@@ -124,9 +126,7 @@ namespace API.Controllers
 
         [HttpPatch("{codigoTracking}/return")]
         [Authorize(Roles = "Piloto")]
-        /// <summary>
-        /// Para rol piloto y marca un envío como devuelto usando su Código
-        /// </summary>
+     
         public async Task<IActionResult> ReturnShipment(string codigoTracking, [FromBody] ReturnShipmentDto dto)
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -151,6 +151,7 @@ namespace API.Controllers
             {
                 return UnprocessableEntity(new { message = ex.Message });
             }
+
         }
 
         /// <summary>
@@ -177,6 +178,70 @@ namespace API.Controllers
             catch (KeyNotFoundException ex)
             {
                 return NotFound(new { message = ex.Message });
+            }
+        }
+
+
+        /// <summary>
+        /// Edita los datos de un shipment por ID (dirección, peso, etc.)
+        /// </summary>
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Administrador")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateShipmentDto dto)
+        {
+            try
+            {
+                var resultado = await _shipmentService.ActualizarShipmentAsync(id, dto);
+                if (resultado == null)
+                    return NotFound(new { message = "Envío o destinatario no encontrado." });
+
+                return Ok(resultado);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Cambia el estado de un shipment (Recolectado, En bodega, En ruta, Entregado, Devolución)
+        /// </summary>
+        [HttpPatch("{id}/status")]
+        [Authorize(Roles = "Administrador")]
+        public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateShipmentStatusDto dto)
+        {
+            try
+            {
+                var resultado = await _shipmentService.CambiarEstadoAsync(id, dto);
+                if (resultado == null)
+                    return NotFound(new { message = "Envío no encontrado." });
+
+                return Ok(resultado);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Marca un shipment como "En Bodega" (solo Administrador departamental)
+        /// </summary>
+        [HttpPatch("{id}/warehouse")]
+        [Authorize(Roles = "Administrador")]
+        public async Task<IActionResult> MarkAsWarehouse(int id)
+        {
+            try
+            {
+                var resultado = await _shipmentService.MarcarEnBodegaAsync(id);
+                if (resultado == null)
+                    return NotFound(new { message = "Envío no encontrado." });
+
+                return Ok(resultado);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
             }
         }
 
