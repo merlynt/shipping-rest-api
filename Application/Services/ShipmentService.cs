@@ -192,7 +192,8 @@ namespace Application.Services
                 EstadoNombre = envio.Estado?.Nombre ?? "Sin Estado",
                 DestinatarioNombre = $"{envio.Destinatario?.Nombre} {envio.Destinatario?.Apellido}",
                 DestinatarioTelefono = envio.Destinatario?.Telefono ?? "",
-                DestinatarioDireccion = envio.Destinatario?.Direccion ?? ""
+                DestinatarioDireccion = envio.Destinatario?.Direccion ?? "",
+                NombrePiloto = envio.Piloto != null ? envio.Piloto.Nombre : "No asignado"
             };
         }
 
@@ -224,7 +225,8 @@ namespace Application.Services
                 EstadoNombre = envio.Estado?.Nombre ?? "Sin Estado",
                 DestinatarioNombre = $"{envio.Destinatario?.Nombre} {envio.Destinatario?.Apellido}",
                 DestinatarioTelefono = envio.Destinatario?.Telefono ?? "",
-                DestinatarioDireccion = envio.Destinatario?.Direccion ?? ""
+                DestinatarioDireccion = envio.Destinatario?.Direccion ?? "",
+                NombrePiloto = envio.Piloto != null ? envio.Piloto.Nombre : "No asignado"
             };
         }
 
@@ -249,7 +251,8 @@ namespace Application.Services
                 EstadoNombre = envio.Estado?.Nombre ?? "Sin Estado",
                 DestinatarioNombre = $"{envio.Destinatario?.Nombre} {envio.Destinatario?.Apellido}",
                 DestinatarioTelefono = envio.Destinatario?.Telefono ?? "",
-                DestinatarioDireccion = envio.Destinatario?.Direccion ?? ""
+                DestinatarioDireccion = envio.Destinatario?.Direccion ?? "",
+                NombrePiloto = envio.Piloto != null ? envio.Piloto.Nombre : "No asignado"
             };
         }
     }
