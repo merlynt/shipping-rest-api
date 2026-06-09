@@ -160,5 +160,97 @@ namespace Application.Services
 
             return true;
         }
+
+        public async Task<EnvioResponseDto?> ActualizarShipmentAsync(int id, UpdateShipmentDto dto)
+        {
+            var envio = await _shipmentRepository.ObtenerPorId(id);
+            if (envio == null) return null;
+
+            if (dto.Peso.HasValue) envio.Peso = dto.Peso.Value;
+            if (!string.IsNullOrEmpty(dto.Descripcion)) envio.Descripcion = dto.Descripcion;
+            if (dto.DestinatarioId.HasValue)
+            {
+                var existe = await _shipmentRepository.ExisteDestinatario(dto.DestinatarioId.Value);
+                if (!existe) return null;
+                envio.DestinatarioId = dto.DestinatarioId.Value;
+            }
+            if (dto.PilotoId.HasValue)
+            {
+                var existePiloto = await _shipmentRepository.ExistePiloto(dto.PilotoId.Value);
+                if (!existePiloto) return null;
+                envio.PilotoId = dto.PilotoId.Value;
+            }
+
+            await _shipmentRepository.ActualizarAsync(envio);
+
+            return new EnvioResponseDto
+            {
+                Id = envio.Id,
+                CodigoTracking = envio.CodigoTracking,
+                Peso = envio.Peso,
+                Descripcion = envio.Descripcion,
+                EstadoNombre = envio.Estado?.Nombre ?? "Sin Estado",
+                DestinatarioNombre = $"{envio.Destinatario?.Nombre} {envio.Destinatario?.Apellido}",
+                DestinatarioTelefono = envio.Destinatario?.Telefono ?? "",
+                DestinatarioDireccion = envio.Destinatario?.Direccion ?? ""
+            };
+        }
+
+        public async Task<EnvioResponseDto?> CambiarEstadoAsync(int id, UpdateShipmentStatusDto dto)
+        {
+            var envio = await _shipmentRepository.ObtenerPorId(id);
+            if (envio == null) return null;
+
+            var estadosValidos = new[] {
+        EstadosEnvios.Recolectado,
+        EstadosEnvios.EnBodega,
+        EstadosEnvios.EnRuta,
+        EstadosEnvios.Entregado,
+        EstadosEnvios.Devolucion
+    };
+
+            if (!estadosValidos.Contains(dto.EstadoId))
+                throw new InvalidOperationException("El estado proporcionado no es válido.");
+
+            envio.EstadoId = dto.EstadoId;
+            await _shipmentRepository.ActualizarAsync(envio);
+
+            return new EnvioResponseDto
+            {
+                Id = envio.Id,
+                CodigoTracking = envio.CodigoTracking,
+                Peso = envio.Peso,
+                Descripcion = envio.Descripcion,
+                EstadoNombre = envio.Estado?.Nombre ?? "Sin Estado",
+                DestinatarioNombre = $"{envio.Destinatario?.Nombre} {envio.Destinatario?.Apellido}",
+                DestinatarioTelefono = envio.Destinatario?.Telefono ?? "",
+                DestinatarioDireccion = envio.Destinatario?.Direccion ?? ""
+            };
+        }
+
+
+        public async Task<EnvioResponseDto?> MarcarEnBodegaAsync(int id)
+        {
+            var envio = await _shipmentRepository.ObtenerPorId(id);
+            if (envio == null) return null;
+
+            if (envio.EstadoId != EstadosEnvios.Recolectado)
+                throw new InvalidOperationException("Solo se puede marcar En Bodega un envío que esté Recolectado.");
+
+            envio.EstadoId = EstadosEnvios.EnBodega;
+            await _shipmentRepository.ActualizarAsync(envio);
+
+            return new EnvioResponseDto
+            {
+                Id = envio.Id,
+                CodigoTracking = envio.CodigoTracking,
+                Peso = envio.Peso,
+                Descripcion = envio.Descripcion,
+                EstadoNombre = envio.Estado?.Nombre ?? "Sin Estado",
+                DestinatarioNombre = $"{envio.Destinatario?.Nombre} {envio.Destinatario?.Apellido}",
+                DestinatarioTelefono = envio.Destinatario?.Telefono ?? "",
+                DestinatarioDireccion = envio.Destinatario?.Direccion ?? ""
+            };
+        }
     }
 }

@@ -17,5 +17,9 @@ namespace Application.Services
         Task<bool> EntregarEnvioAsync(string codigoTracking, int driverId, DeliverShipmentDto dto);
 
         Task<bool> DevolverEnvioAsync(string codigoTracking, int usuarioId, ReturnShipmentDto dto);
+        
+        Task<EnvioResponseDto?> ActualizarShipmentAsync(int id, UpdateShipmentDto dto);
+        Task<EnvioResponseDto?> CambiarEstadoAsync(int id, UpdateShipmentStatusDto dto);
+        Task<EnvioResponseDto?> MarcarEnBodegaAsync(int id);
     }
 }
