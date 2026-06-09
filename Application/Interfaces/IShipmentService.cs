@@ -18,8 +18,7 @@ namespace Application.Interfaces
 
         Task<bool> DevolverEnvioAsync(string codigoTracking, int usuarioId, ReturnShipmentDto dto);
 
-<<<<<<< HEAD:Application/Services/IShipmentService.cs
-=======
+
         Task<DriverShipmentDetail> ObtenerDetalleEnvioParaDriverAsync(int shipmentId, int usuarioId);
 
         Task<List<ShipmentReportDto>> ObtenerReporteAdminPorEmpresaAsync(int empresaId);
@@ -27,7 +26,7 @@ namespace Application.Interfaces
         Task<List<ShipmentReportDto>> ObtenerReporteAdminPorEstadoAsync(int? statusId);
 
         
->>>>>>> 822d696d0d40d379e7c7cbefa04fcfb59cdaee71:Application/Interfaces/IShipmentService.cs
+
         Task<EnvioResponseDto?> ActualizarShipmentAsync(int id, UpdateShipmentDto dto);
         Task<EnvioResponseDto?> CambiarEstadoAsync(int id, UpdateShipmentStatusDto dto);
         Task<EnvioResponseDto?> MarcarEnBodegaAsync(int id);
