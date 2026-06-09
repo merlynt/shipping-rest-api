@@ -34,5 +34,18 @@ namespace Infrastructure.Repositories
             var piloto = await _context.Pilotos.FirstOrDefaultAsync(p => p.UsuarioId == usuarioId);
             return piloto?.Id ?? 0;
         }
+
+        public async Task<(int Id, bool EsMaster)> ObtenerDatosAdminPorUsuario(int usuarioId)
+        {
+            var admin = await _context.Administradores
+                .FirstOrDefaultAsync(a => a.UsuarioId == usuarioId);
+
+            if (admin != null)
+            {
+                return (admin.Id, admin.EsMaster);
+            }
+
+            return (0, false);
+        }
     }
 }

@@ -15,11 +15,13 @@ namespace Application.Services
     {
         private readonly IShipmentRepository _shipmentRepository;
         private readonly ITrackingService _trackingService;
+        private readonly ICompanyRepository _companyRepository;
 
-        public ShipmentService(IShipmentRepository shipmentRepository, ITrackingService trackingService)
+        public ShipmentService(IShipmentRepository shipmentRepository, ITrackingService trackingService, ICompanyRepository companyRepository)
         {
             _shipmentRepository = shipmentRepository;
             _trackingService = trackingService;
+            _companyRepository = companyRepository;
         }
 
         async Task<IEnumerable<DriverShipmentResponseDto>> IShipmentService.GetMyShipmentsAsync(int usuarioId)
@@ -192,17 +194,14 @@ namespace Application.Services
 
         public async Task<List<ShipmentReportDto>> ObtenerReporteAdminPorEmpresaAsync(int empresaId)
         {
-            var empresa = await _shipmentRepository.ObtenerTodosPorEmpresa(empresaId);
+            var empresaExiste = await _companyRepository.ObtenerPorIdConUsuarioAsync(empresaId);
 
-            if (empresa == null)
+            if (empresaExiste == null)
             {
-           
                 throw new KeyNotFoundException($"No se encontró ninguna empresa registrada con el ID {empresaId}.");
             }
 
-          
-            var envios = await _shipmentRepository.ObtenerTodosPorEmpresa(empresaId);
-
+            var envios = await _shipmentRepository.ObtenerEnviosConDetallesPorEmpresaAsync(empresaId);
 
             var enviosDto = envios.Select(e => new ShipmentReportDto
             {
@@ -210,18 +209,32 @@ namespace Application.Services
                 CodigoTracking = e.CodigoTracking,
                 Peso = e.Peso,
                 Descripcion = e.Descripcion,
-
                 EstadoNombre = e.Estado?.Nombre ?? "Sin Estado",
                 DestinatarioNombre = e.Destinatario?.Nombre ?? "Sin Destinatario",
                 EmpresaNombre = e.Empresa?.NombreEmpresa ?? "Empresa Desconocida",
-
-                // Suponiendo que tu entidad Piloto tiene una propiedad llamada "Nombre"
-                PilotoNombre = e.Piloto?.Nombre,
-
-                MotivoDevolucion = e.MotivoDevolucion
+                PilotoNombre = e.Piloto?.Nombre ?? "No se ha asignado",
+                MotivoDevolucion = e.MotivoDevolucion ?? "No aplica",
             }).ToList();
 
             return enviosDto;
+        }
+
+        public async Task<List<ShipmentReportDto>> ObtenerReporteAdminPorEstadoAsync(int? statusId)
+        {
+            var envios = await _shipmentRepository.ObtenerReportePorEstadoAsync(statusId);
+
+            return envios.Select(e => new ShipmentReportDto
+            {
+                Id = e.Id,
+                CodigoTracking = e.CodigoTracking,
+                Peso = e.Peso,
+                Descripcion = e.Descripcion,
+                EstadoNombre = e.Estado?.Nombre ?? "Sin Estado",
+                DestinatarioNombre = e.Destinatario?.Nombre ?? "Sin Destinatario",
+                EmpresaNombre = e.Empresa?.NombreEmpresa ?? "Empresa Desconocida",
+                PilotoNombre = e.Piloto?.Nombre ?? "No se ha asignado",
+                MotivoDevolucion = e.MotivoDevolucion ?? "N/A"
+            }).ToList();
         }
 
     }

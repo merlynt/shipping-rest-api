@@ -16,40 +16,42 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// Obtiene el historial de envíos (shipments) filtrado por empresa.
+        /// Obtiene el historial de envíos. Puede filtrar por empresa o por estado a nivel global.
         /// </summary>
         /// <remarks>
         /// **Rol requerido:** Admin Master
         /// 
-        /// Retorna un reporte aplanado con los envíos. Si la empresa no tiene envíos, retorna una lista vacía (HTTP 200). Si la empresa no existe en el sistema, retorna un HTTP 404.
+        /// - Si envías `companies_id`: Retorna los envíos específicos de esa empresa.
+        /// - Si no envías `companies_id`: Retorna un reporte global.
+        /// - Si además envías `status_id`: Filtra el reporte global por ese estado exacto.
         /// </remarks>
-        /// <param name="companiesId">El ID de la empresa a consultar</param>
-        /// <response code="200">Retorna la lista de envíos filtrados</response>
-        /// <response code="404">Si el companies_id proporcionado no existe en la base de datos</response>
-        [HttpGet("shipments")] // Completa la ruta a /api/reports/shipments
-        public async Task<IActionResult> GetShipmentsReport([FromQuery(Name = "companies_id")] int companiesId)
+        /// <param name="companiesId">El ID de la empresa a consultar (Opcional)</param>
+        /// <param name="statusId">El ID del estado para filtrar el reporte global (Opcional)</param>
+        /// <response code="200">Retorna la lista de envíos según los filtros aplicados</response>
+        /// <response code="404">Si la empresa proporcionada no existe</response>
+       
+        [Authorize(Policy = "SoloAdminMaster")]
+        [HttpGet("shipments")]
+        public async Task<IActionResult> GetShipmentsReport([FromQuery(Name = "companies_id")] int? companiesId,[FromQuery(Name = "status_id")] int? statusId)
         {
             try
             {
-                // Llamamos al método que construimos en el servicio
-                var reporte = await _shipmentService.ObtenerReporteAdminPorEmpresaAsync(companiesId);
-
-                // Devuelve HTTP 200 OK con el array de resultados
-                return Ok(reporte);
+               
+                if (companiesId.HasValue)
+                {
+                    var reporteEmpresa = await _shipmentService.ObtenerReporteAdminPorEmpresaAsync(companiesId.Value);
+                    return Ok(reporteEmpresa);
+                }
+                var reporteEstados = await _shipmentService.ObtenerReporteAdminPorEstadoAsync(statusId);
+                return Ok(reporteEstados);
             }
             catch (KeyNotFoundException ex)
             {
-                // Si el servicio detectó que la empresa no existe, atrapa la excepción y retorna 404
                 return NotFound(new { error = ex.Message });
             }
             catch (Exception ex)
             {
-                // Cualquier otro error de ejecución
-                return StatusCode(500, new
-                {
-                    error = "Ocurrió un error interno al generar el reporte de envíos.",
-                    detalle = ex.Message
-                });
+                return StatusCode(500, new { error = "Ocurrió un error interno.", detalle = ex.Message });
             }
         }
     }

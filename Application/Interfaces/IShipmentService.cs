@@ -22,5 +22,7 @@ namespace Application.Interfaces
 
         Task<List<ShipmentReportDto>> ObtenerReporteAdminPorEmpresaAsync(int empresaId);
 
+        Task<List<ShipmentReportDto>> ObtenerReporteAdminPorEstadoAsync(int? statusId);
+
     }
 }

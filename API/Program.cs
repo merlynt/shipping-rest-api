@@ -53,6 +53,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("SoloAdminMaster", policy =>
+    {
+        // Exige que el token tenga el claim "esMaster" con valor "true"
+        policy.RequireClaim("esMaster", "true", "True");
+    });
+});
+
 
 builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(options =>
