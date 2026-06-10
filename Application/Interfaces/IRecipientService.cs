@@ -11,5 +11,7 @@ namespace Application.Interfaces
     public interface IRecipientService
     {
         Task<Destinatario> CrearDestinatarioAsync(CreateDestinatarioDto dto);
+
+        Task<bool> ActualizarDestinatarioAsync(int id, UpdateDestinatarioDto dto);
     }
 }

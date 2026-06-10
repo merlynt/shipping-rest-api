@@ -42,5 +42,35 @@ namespace API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+
+        /// <summary>
+        /// Edita los datos de un destinatario registrado.
+        /// </summary>
+        /// <remarks>
+        /// **Rol Requerido:** Empresa.
+        /// Permite corregir información de contacto o dirección antes de asociarlo a un envío.
+        /// </remarks>
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateDestinatarioDto dto)
+        {
+            try
+            {
+                await _recipientService.ActualizarDestinatarioAsync(id, dto);
+
+                // Cumple con: "Entonces el sistema actualiza recipients y retorna HTTP 200"
+                return Ok(new { message = "Destinatario actualizado correctamente." });
+            }
+            catch (KeyNotFoundException)
+            {
+                // Cumple con: "Si el recipients.id no existe -> HTTP 404"
+                return NotFound(new { message = "El destinatario especificado no existe." });
+            }
+            catch (ArgumentException ex)
+            {
+                // Cumple con: "Si el nuevo districts_id no existe -> HTTP 400"
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }

@@ -66,12 +66,10 @@ namespace Application.Services
             return await ObtenerPorTrackingAsync(envio.CodigoTracking, empresaId);
         }
 
-        public async Task<List<EnvioResponseDto>> ObtenerTodosPorEmpresaAsync(int empresaId)
-        {
-            var envios = await _shipmentRepository.ObtenerTodosPorEmpresa(empresaId);
 
-            // El mapeo ahora vive aquí, lejos del controlador
-            return envios.Select(e => new EnvioResponseDto
+        private EnvioResponseDto MapearAEnvioResponseDto(Envio e)
+        {
+            return new EnvioResponseDto
             {
                 Id = e.Id,
                 CodigoTracking = e.CodigoTracking,
@@ -80,32 +78,30 @@ namespace Application.Services
                 EstadoNombre = e.Estado?.Nombre ?? "Sin Estado",
                 DestinatarioNombre = $"{e.Destinatario?.Nombre} {e.Destinatario?.Apellido}",
                 DestinatarioTelefono = e.Destinatario?.Telefono ?? "",
-                DestinatarioDireccion = e.Destinatario?.Direccion ?? ""
-            }).ToList();
+                DestinatarioDireccion = e.Destinatario?.Direccion ?? "",
+                // Auditoría unificada
+                FechaAsignacion = e.FechaAsignacion,
+                NombrePiloto = e.Piloto?.Nombre ?? "No asignado",
+                Evidencias = e.Evidencias?.Select(ev => new EvidenciaDto
+                {
+                    FirmaUrl = ev.FirmaUrl,
+                    FotoUrl = ev.FotoUrl
+                }).ToList() ?? new List<EvidenciaDto>()
+            };
         }
+
+        public async Task<List<EnvioResponseDto>> ObtenerTodosPorEmpresaAsync(int empresaId)
+        {
+            var envios = await _shipmentRepository.ObtenerTodosPorEmpresa(empresaId);
+            return envios.Select(MapearAEnvioResponseDto).ToList();
+        }
+
 
         public async Task<EnvioResponseDto?> ObtenerPorTrackingAsync(string codigoTracking, int empresaId)
         {
             var envio = await _shipmentRepository.ObtenerPorTracking(codigoTracking, empresaId);
-
-            if (envio == null) return null;
-
-            return new EnvioResponseDto
-            {
-                Id = envio.Id,
-                CodigoTracking = envio.CodigoTracking,
-                Peso = envio.Peso,
-                Descripcion = envio.Descripcion,
-                EstadoNombre = envio.Estado?.Nombre ?? "Sin Estado",
-                DestinatarioNombre = $"{envio.Destinatario?.Nombre} {envio.Destinatario?.Apellido}",
-                DestinatarioTelefono = envio.Destinatario?.Telefono ?? "",
-                DestinatarioDireccion = envio.Destinatario?.Direccion ?? "",
-                Evidencias = envio.Evidencias?.Select(e => new EvidenciaDto
-                {
-                    FirmaUrl = e.FirmaUrl,
-                    FotoUrl = e.FotoUrl
-                }).ToList() ?? new List<EvidenciaDto>()
-            };
+            // Si es null retorna null, si no, mapea
+            return envio == null ? null : MapearAEnvioResponseDto(envio);
         }
 
         public async Task<bool> EntregarEnvioAsync(string codigoTracking, int usuarioId, DeliverShipmentDto dto)
@@ -171,32 +167,18 @@ namespace Application.Services
 
             if (dto.Peso.HasValue) envio.Peso = dto.Peso.Value;
             if (!string.IsNullOrEmpty(dto.Descripcion)) envio.Descripcion = dto.Descripcion;
+
             if (dto.DestinatarioId.HasValue)
             {
                 var existe = await _shipmentRepository.ExisteDestinatario(dto.DestinatarioId.Value);
                 if (!existe) return null;
                 envio.DestinatarioId = dto.DestinatarioId.Value;
             }
-            if (dto.PilotoId.HasValue)
-            {
-                var existePiloto = await _shipmentRepository.ExistePiloto(dto.PilotoId.Value);
-                if (!existePiloto) return null;
-                envio.PilotoId = dto.PilotoId.Value;
-            }
 
             await _shipmentRepository.ActualizarAsync(envio);
 
-            return new EnvioResponseDto
-            {
-                Id = envio.Id,
-                CodigoTracking = envio.CodigoTracking,
-                Peso = envio.Peso,
-                Descripcion = envio.Descripcion,
-                EstadoNombre = envio.Estado?.Nombre ?? "Sin Estado",
-                DestinatarioNombre = $"{envio.Destinatario?.Nombre} {envio.Destinatario?.Apellido}",
-                DestinatarioTelefono = envio.Destinatario?.Telefono ?? "",
-                DestinatarioDireccion = envio.Destinatario?.Direccion ?? ""
-            };
+            // Mapeo completo incluyendo los nuevos campos de auditoría
+            return MapearAEnvioResponseDto(envio);
         }
 
         public async Task<EnvioResponseDto?> CambiarEstadoAsync(int id, UpdateShipmentStatusDto dto)
@@ -218,17 +200,7 @@ namespace Application.Services
             envio.EstadoId = dto.EstadoId;
             await _shipmentRepository.ActualizarAsync(envio);
 
-            return new EnvioResponseDto
-            {
-                Id = envio.Id,
-                CodigoTracking = envio.CodigoTracking,
-                Peso = envio.Peso,
-                Descripcion = envio.Descripcion,
-                EstadoNombre = envio.Estado?.Nombre ?? "Sin Estado",
-                DestinatarioNombre = $"{envio.Destinatario?.Nombre} {envio.Destinatario?.Apellido}",
-                DestinatarioTelefono = envio.Destinatario?.Telefono ?? "",
-                DestinatarioDireccion = envio.Destinatario?.Direccion ?? ""
-            };
+            return MapearAEnvioResponseDto(envio);
         }
 
 
@@ -243,18 +215,9 @@ namespace Application.Services
             envio.EstadoId = EstadosEnvios.EnBodega;
             await _shipmentRepository.ActualizarAsync(envio);
 
-            return new EnvioResponseDto
-            {
-                Id = envio.Id,
-                CodigoTracking = envio.CodigoTracking,
-                Peso = envio.Peso,
-                Descripcion = envio.Descripcion,
-                EstadoNombre = envio.Estado?.Nombre ?? "Sin Estado",
-                DestinatarioNombre = $"{envio.Destinatario?.Nombre} {envio.Destinatario?.Apellido}",
-                DestinatarioTelefono = envio.Destinatario?.Telefono ?? "",
-                DestinatarioDireccion = envio.Destinatario?.Direccion ?? ""
-            };
+            return MapearAEnvioResponseDto(envio);
         }
+
         public async Task<DriverShipmentDetail> ObtenerDetalleEnvioParaDriverAsync(int shipmentId, int usuarioId)
         {
             var piloto = await _shipmentRepository.GetByUsuarioIdAsync(usuarioId)
