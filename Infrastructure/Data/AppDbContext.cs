@@ -68,8 +68,30 @@ namespace Infrastructure.Data
                 .HasOne(e => e.Estado).WithMany().HasForeignKey(e => e.EstadoId).OnDelete(DeleteBehavior.Restrict);
 
             // 1. Catálogos Base (DEBEN IR PRIMERO)
-            modelBuilder.Entity<Departamento>().HasData(new Departamento { Id = 1, Nombre = "San Salvador" });
-            modelBuilder.Entity<Distrito>().HasData(new Distrito { Id = 1, Nombre = "San Salvador", DepartamentoId = 1 });
+            modelBuilder.Entity<Departamento>().HasData(
+                new Departamento { Id = 1, Nombre = "San Salvador" },
+                new Departamento { Id = 2, Nombre = "Santa Ana" },
+                new Departamento { Id = 3, Nombre = "Sonsonate" },
+                new Departamento { Id = 4, Nombre = "Chalatenango" },
+                new Departamento { Id = 5, Nombre = "La Libertad" },
+                new Departamento { Id = 6, Nombre = "Cuscatlán" },
+                new Departamento { Id = 7, Nombre = "La Paz" },
+                new Departamento { Id = 8, Nombre = "Cabañas" },
+                new Departamento { Id = 9, Nombre = "San Vicente" },
+                new Departamento { Id = 10, Nombre = "Usulután" },
+                new Departamento { Id = 11, Nombre = "Morazán" },
+                new Departamento { Id = 12, Nombre = "San Miguel" },
+                new Departamento { Id = 13, Nombre = "Ahuachapán" },
+                new Departamento { Id = 14, Nombre = "La Unión" }
+            );
+
+            modelBuilder.Entity<Distrito>().HasData(
+                new Distrito { Id = 1, Nombre = "San Salvador", DepartamentoId = 1 },
+                new Distrito { Id = 2, Nombre = "Santa Ana", DepartamentoId = 2 },
+                new Distrito { Id = 3, Nombre = "San Miguel", DepartamentoId = 12 },
+                new Distrito { Id = 4, Nombre = "La Unión", DepartamentoId = 14 },
+                new Distrito { Id = 5, Nombre = "Pasaquina", DepartamentoId = 14 }
+            );
 
             modelBuilder.Entity<Estado>().HasData(
                 new Estado { Id = 1, Nombre = "Recolectado" },

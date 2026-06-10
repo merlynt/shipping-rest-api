@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Application.DTOS;
+using Application.Interfaces;
 using Domain.Entities;
-using Application.DTOS;
 using Domain.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 
 namespace API.Controllers
@@ -12,35 +13,64 @@ namespace API.Controllers
     [Authorize(Roles = "Empresa")]
     public class RecipientsController : ControllerBase
     {
-        private readonly IRecipientRepository _recipientRepo; // <-- Inyectamos el repositorio
+        private readonly IRecipientService _recipientService; // <-- Inyectamos el SERVICIO, no el repositorio
 
-        public RecipientsController(IRecipientRepository recipientRepo)
+        public RecipientsController(IRecipientService recipientService)
         {
-            _recipientRepo = recipientRepo;
+            _recipientService = recipientService;
         }
-
+        /// <summary>
+        /// Crea un nuevo destinatario en el sistema.
+        /// </summary>
+        /// <remarks>
+        /// **Rol Requerido:** Empresa.
+        /// Registra la información de la persona que recibirá el paquete. Valida que el distrito ingresado exista en el sistema.
+        /// </remarks>
         [HttpPost]
         public async Task<IActionResult> Create(CreateDestinatarioDto dto)
         {
-            // 1. Delegamos la validación a la infraestructura mediante la interfaz
-            var distritoExiste = await _recipientRepo.ExisteDistrito(dto.DistritoId);
-            if (!distritoExiste) return BadRequest("El distrito no existe");
-
-            var destinatario = new Destinatario
+            try
             {
-                Nombre = dto.Nombre,
-                Apellido = dto.Apellido,
-                Telefono = dto.Telefono,
-                Direccion = dto.Direccion,
-                Email = dto.Email,
-                DistritoId = dto.DistritoId
-            };
+                // El controlador solo delega el trabajo pesado a la capa de Aplicación
+                var destinatario = await _recipientService.CrearDestinatarioAsync(dto);
 
-            // 2. Delegamos el guardado
-            await _recipientRepo.Crear(destinatario);
+                return CreatedAtAction(nameof(Create), new { id = destinatario.Id }, destinatario);
+            }
+            catch (ArgumentException ex)
+            {
+                // Si la regla de negocio falla (ej. Distrito no existe), capturamos el error
+                return BadRequest(new { message = ex.Message });
+            }
+        }
 
-            // Retornamos 201 Created
-            return CreatedAtAction(nameof(Create), new { id = destinatario.Id }, destinatario);
+
+        /// <summary>
+        /// Edita los datos de un destinatario registrado.
+        /// </summary>
+        /// <remarks>
+        /// **Rol Requerido:** Empresa.
+        /// Permite corregir información de contacto o dirección antes de asociarlo a un envío.
+        /// </remarks>
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateDestinatarioDto dto)
+        {
+            try
+            {
+                await _recipientService.ActualizarDestinatarioAsync(id, dto);
+
+                // Cumple con: "Entonces el sistema actualiza recipients y retorna HTTP 200"
+                return Ok(new { message = "Destinatario actualizado correctamente." });
+            }
+            catch (KeyNotFoundException)
+            {
+                // Cumple con: "Si el recipients.id no existe -> HTTP 404"
+                return NotFound(new { message = "El destinatario especificado no existe." });
+            }
+            catch (ArgumentException ex)
+            {
+                // Cumple con: "Si el nuevo districts_id no existe -> HTTP 400"
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

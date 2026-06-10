@@ -11,6 +11,5 @@ namespace Application.DTOS
         public decimal? Peso { get; set; }
         public string? Descripcion { get; set; }
         public int? DestinatarioId { get; set; }
-        public int? PilotoId { get; set; }
     }
 }

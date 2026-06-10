@@ -4,6 +4,7 @@ using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260610004506_SincronizacionModelosNuevos")]
+    partial class SincronizacionModelosNuevos
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -99,71 +102,6 @@ namespace Infrastructure.Migrations
                         {
                             Id = 1,
                             Nombre = "San Salvador"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Nombre = "Santa Ana"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Nombre = "Sonsonate"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Nombre = "Chalatenango"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Nombre = "La Libertad"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Nombre = "Cuscatlán"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Nombre = "La Paz"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Nombre = "Cabañas"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            Nombre = "San Vicente"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            Nombre = "Usulután"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            Nombre = "Morazán"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            Nombre = "San Miguel"
-                        },
-                        new
-                        {
-                            Id = 13,
-                            Nombre = "Ahuachapán"
-                        },
-                        new
-                        {
-                            Id = 14,
-                            Nombre = "La Unión"
                         });
                 });
 
@@ -232,30 +170,6 @@ namespace Infrastructure.Migrations
                             Id = 1,
                             DepartamentoId = 1,
                             Nombre = "San Salvador"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            DepartamentoId = 2,
-                            Nombre = "Santa Ana"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            DepartamentoId = 12,
-                            Nombre = "San Miguel"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            DepartamentoId = 14,
-                            Nombre = "La Unión"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            DepartamentoId = 14,
-                            Nombre = "Pasaquina"
                         });
                 });
 
@@ -339,9 +253,6 @@ namespace Infrastructure.Migrations
 
                     b.Property<int>("EstadoId")
                         .HasColumnType("int");
-
-                    b.Property<DateTime?>("FechaAsignacion")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("MotivoDevolucion")
                         .HasColumnType("nvarchar(max)");

@@ -20,6 +20,7 @@ namespace Infrastructure.Repositories
             return await _context.Envios
                 .Where(e => e.EmpresaId == empresaId)
                 .Include(e => e.Estado)
+                .Include(e => e.Piloto)
                 .Include(e => e.Destinatario)
                 .ToListAsync();
         }
@@ -36,6 +37,7 @@ namespace Infrastructure.Repositories
             return await _context.Envios
                 .Include(e => e.Evidencias)
                 .Include(e => e.Destinatario)
+                .Include(e => e.Piloto)
                 .Include(e => e.Estado)
                 .FirstOrDefaultAsync(e => e.CodigoTracking == codigoTracking && e.EmpresaId == empresaId);
         }

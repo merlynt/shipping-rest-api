@@ -98,6 +98,7 @@ namespace API.Controllers
 
             envio.PilotoId = dto.PilotoId;
             envio.EstadoId = ESTADO_EN_RUTA_ID;
+            envio.FechaAsignacion = DateTime.Now;
 
             var actualizado = await _shipmentRepo.Actualizar(envio);
 

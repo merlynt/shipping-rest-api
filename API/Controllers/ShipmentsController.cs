@@ -22,8 +22,16 @@ namespace API.Controllers
             _userContext = userContext;
         }
 
+        /// <summary>
+        /// Crea una nueva orden de envío y genera su código de tracking automáticamente.
+        /// </summary>
+        /// <remarks>
+        /// **Rol Requerido:** Empresa.
+        /// El envío queda asociado al usuario Empresa que hace la petición e inicia en estado "Recolectado".
+        /// </remarks>
         [HttpPost]
         [Authorize(Roles = "Empresa")]
+
         public async Task<IActionResult> Create(CreateEnvioDto dto)
         {
             var empresaId = _userContext.GetUserId();
@@ -37,6 +45,15 @@ namespace API.Controllers
             return CreatedAtAction(nameof(GetByTracking), new { codigoTracking = nuevoEnvioDto.CodigoTracking }, nuevoEnvioDto);
         }
 
+
+
+        /// <summary>
+        /// Obtiene el historial completo de todos los envíos realizados.
+        /// </summary>
+        /// <remarks>
+        /// **Rol Requerido:** Empresa.
+        /// El sistema filtra automáticamente los resultados para mostrar únicamente los envíos que le pertenecen a la empresa autenticada.
+        /// </remarks>
         [HttpGet]
         [Authorize(Roles = "Empresa")]
         public async Task<ActionResult<List<EnvioResponseDto>>> GetAll()
@@ -47,6 +64,14 @@ namespace API.Controllers
             return Ok(envios);
         }
 
+
+        /// <summary>
+        /// Rastrea el estado y detalle de un envío específico mediante su código de seguimiento.
+        /// </summary>
+        /// <remarks>
+        /// **Rol Requerido:** Empresa.
+        /// Si el paquete ya fue entregado, este endpoint también retornará las rutas de las evidencias (foto y firma).
+        /// </remarks>
         [HttpGet("{codigoTracking}")]
         [Authorize(Roles = "Empresa")]
         public async Task<ActionResult<EnvioResponseDto>> GetByTracking(string codigoTracking)
