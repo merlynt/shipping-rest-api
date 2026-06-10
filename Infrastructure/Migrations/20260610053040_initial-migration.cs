@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -7,7 +8,7 @@
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class initialmigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -79,7 +80,8 @@ namespace Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    RolId = table.Column<int>(type: "int", nullable: false)
+                    RolId = table.Column<int>(type: "int", nullable: false),
+                    Activo = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -213,7 +215,9 @@ namespace Infrastructure.Migrations
                     EstadoId = table.Column<int>(type: "int", nullable: false),
                     DestinatarioId = table.Column<int>(type: "int", nullable: false),
                     EmpresaId = table.Column<int>(type: "int", nullable: false),
-                    PilotoId = table.Column<int>(type: "int", nullable: true)
+                    PilotoId = table.Column<int>(type: "int", nullable: true),
+                    FechaAsignacion = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    MotivoDevolucion = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -267,7 +271,23 @@ namespace Infrastructure.Migrations
             migrationBuilder.InsertData(
                 table: "Departamentos",
                 columns: new[] { "Id", "Nombre" },
-                values: new object[] { 1, "San Salvador" });
+                values: new object[,]
+                {
+                    { 1, "San Salvador" },
+                    { 2, "Santa Ana" },
+                    { 3, "Sonsonate" },
+                    { 4, "Chalatenango" },
+                    { 5, "La Libertad" },
+                    { 6, "Cuscatlán" },
+                    { 7, "La Paz" },
+                    { 8, "Cabañas" },
+                    { 9, "San Vicente" },
+                    { 10, "Usulután" },
+                    { 11, "Morazán" },
+                    { 12, "San Miguel" },
+                    { 13, "Ahuachapán" },
+                    { 14, "La Unión" }
+                });
 
             migrationBuilder.InsertData(
                 table: "Estados",
@@ -294,16 +314,23 @@ namespace Infrastructure.Migrations
             migrationBuilder.InsertData(
                 table: "Distritos",
                 columns: new[] { "Id", "DepartamentoId", "Nombre" },
-                values: new object[] { 1, 1, "San Salvador" });
+                values: new object[,]
+                {
+                    { 1, 1, "San Salvador" },
+                    { 2, 2, "Santa Ana" },
+                    { 3, 12, "San Miguel" },
+                    { 4, 14, "La Unión" },
+                    { 5, 14, "Pasaquina" }
+                });
 
             migrationBuilder.InsertData(
                 table: "Usuarios",
-                columns: new[] { "Id", "Email", "Password", "RolId" },
+                columns: new[] { "Id", "Activo", "Email", "Password", "RolId" },
                 values: new object[,]
                 {
-                    { 1, "admin@sistema.com", "123456", 1 },
-                    { 2, "empresa@logistica.com", "123456", 2 },
-                    { 3, "piloto@logistica.com", "123456", 3 }
+                    { 1, true, "admin@sistema.com", "123456", 1 },
+                    { 2, true, "empresa@logistica.com", "123456", 2 },
+                    { 3, true, "piloto@logistica.com", "123456", 3 }
                 });
 
             migrationBuilder.InsertData(
