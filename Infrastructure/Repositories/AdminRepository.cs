@@ -41,8 +41,6 @@ namespace Infrastructure.Repositories
             return administradorCreado;
         }
 
-    
-
         public async Task<Administrador?> GetByIdAsync(int id)
         {
             
@@ -81,5 +79,33 @@ namespace Infrastructure.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+        public async Task<List<Administrador>> ObtenerTodosAsync()
+        {
+            return await _context.Administradores
+                .Include(a => a.Distrito)
+                .Include(a => a.Usuario)
+                    .ThenInclude(u => u.Rol)
+                .ToListAsync();
+        }
+        public async Task EliminarAdministrador(int id)
+        {
+            var adminExistente = await _context.Administradores
+                .Include(a => a.Usuario)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (adminExistente != null)
+            {
+                // Solo ejecuta las instrucciones de borrado, sin preguntar por qué
+                if (adminExistente.Usuario != null)
+                {
+                    _context.Usuarios.Remove(adminExistente.Usuario);
+                }
+
+                _context.Administradores.Remove(adminExistente);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+
     }
 }
