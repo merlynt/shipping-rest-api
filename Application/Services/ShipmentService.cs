@@ -183,6 +183,7 @@ namespace Application.Services
             }
 
             await _shipmentRepository.ActualizarAsync(envio);
+            envio = await _shipmentRepository.ObtenerPorId(envio.Id) ?? envio;
 
             // Mapeo completo incluyendo los nuevos campos de auditoría
             return MapearAEnvioResponseDto(envio);
@@ -206,6 +207,7 @@ namespace Application.Services
 
             envio.EstadoId = dto.EstadoId;
             await _shipmentRepository.ActualizarAsync(envio);
+            envio = await _shipmentRepository.ObtenerPorId(envio.Id) ?? envio;
 
             return MapearAEnvioResponseDto(envio);
         }
@@ -221,6 +223,7 @@ namespace Application.Services
 
             envio.EstadoId = EstadosEnvios.EnBodega;
             await _shipmentRepository.ActualizarAsync(envio);
+            envio = await _shipmentRepository.ObtenerPorId(envio.Id) ?? envio;
 
             return MapearAEnvioResponseDto(envio);
         }
