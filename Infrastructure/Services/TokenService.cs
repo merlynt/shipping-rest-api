@@ -18,31 +18,28 @@ namespace Infrastructure.Security
             _config = config;
         }
 
-        public string GenerarToken(int usuarioId, string rol, int entidadId)
+        public string GenerarToken(int usuarioId, string rol, int entidadId, bool esMaster = false)
         {
-            // 1. Aquí definimos lo que viaja dentro del Token (Los Claims)
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, usuarioId.ToString()),
                 new Claim(ClaimTypes.Role, rol),
-                new Claim("EmpresaId", entidadId.ToString()) // Este es el que lee tu UserContext
+                new Claim("EmpresaId", entidadId.ToString()), 
+
+                new Claim("esMaster", esMaster.ToString().ToLower())
             };
 
-            // 2. Traemos la clave secreta del appsettings.json
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            // 3. Configuramos el Token
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddHours(8), // El token dura 8 horas
+                Expires = DateTime.UtcNow.AddHours(8), 
                 Issuer = _config["Jwt:Issuer"],
                 Audience = _config["Jwt:Audience"],
                 SigningCredentials = creds
             };
 
-            // 4. Creamos y devolvemos el string
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.CreateToken(tokenDescriptor);
 

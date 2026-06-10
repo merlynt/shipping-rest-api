@@ -16,5 +16,8 @@ namespace Domain.Interfaces
         // Métodos para buscar el ID de la entidad según su rol
         Task<int> ObtenerIdEmpresaPorUsuario(int usuarioId);
         Task<int> ObtenerIdPilotoPorUsuario(int usuarioId);
+
+        // Agrega esta línea al final de tu IUsuarioRepository
+        Task<(int Id, bool EsMaster)> ObtenerDatosAdminPorUsuario(int usuarioId);
     }
 }

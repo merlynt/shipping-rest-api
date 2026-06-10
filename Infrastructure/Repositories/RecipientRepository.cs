@@ -27,5 +27,18 @@ namespace Infrastructure.Repositories
             await _context.SaveChangesAsync();
             return destinatario;
         }
+
+        public async Task<Destinatario?> ObtenerPorId(int id)
+        {
+            return await _context.Destinatarios.FindAsync(id);
+        }
+
+    
+        public async Task<Destinatario> Actualizar(Destinatario destinatario)
+        {
+            _context.Destinatarios.Update(destinatario);
+            await _context.SaveChangesAsync();
+            return destinatario;
+        }
     }
 }

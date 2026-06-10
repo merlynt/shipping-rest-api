@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Domain.Interfaces;
 
 namespace Domain.Entities
 {
@@ -21,5 +22,6 @@ namespace Domain.Entities
 
         public int DistritoId { get; set; }
         public Distrito Distrito { get; set; } = null!;
+       
     }
 }

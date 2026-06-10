@@ -27,6 +27,7 @@ namespace API.Controllers
             if (usuario == null) return Unauthorized("Credenciales incorrectas.");
 
             int entidadId = 0;
+            bool esMaster = false; // 👈 1. Agregamos esta variable
 
             if (usuario.Rol?.Nombre == "Empresa")
             {
@@ -36,9 +37,18 @@ namespace API.Controllers
             {
                 entidadId = await _usuarioRepo.ObtenerIdPilotoPorUsuario(usuario.Id);
             }
+            // 👇 2. AGREGAMOS EL BLOQUE DEL ADMINISTRADOR 👇
+            else if (usuario.Rol?.Nombre == "Administrador" || usuario.Rol?.Nombre == "Admin")
+            {
+                // Llamamos al método nuevo que creaste en UsuarioRepository
+                var datosAdmin = await _usuarioRepo.ObtenerDatosAdminPorUsuario(usuario.Id);
 
-            // 3. Generamos el Token
-            var token = _tokenService.GenerarToken(usuario.Id, usuario.Rol!.Nombre, entidadId);
+                entidadId = datosAdmin.Id;
+                esMaster = datosAdmin.EsMaster; // Extraemos el true/false de la base de datos
+            }
+
+            // 👇 3. Le pasamos esMaster al TokenService 👇
+            var token = _tokenService.GenerarToken(usuario.Id, usuario.Rol!.Nombre, entidadId, esMaster);
 
             return Ok(new { Token = token, Rol = usuario.Rol.Nombre });
         }

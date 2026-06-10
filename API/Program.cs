@@ -1,6 +1,6 @@
-using System.Reflection;
-using System.Text;
 using API.Swagger;
+using Application.Interfaces;
+using Application.Services;
 using Domain.Interfaces;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -8,8 +8,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Reflection;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Console.WriteLine("ENTORNO = " + builder.Environment.EnvironmentName);
+Console.WriteLine("CONEXION = " +
+    builder.Configuration.GetConnectionString("CadenaConexion"));
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("CadenaConexion")));
@@ -18,13 +24,22 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<Domain.Interfaces.ITrackingService, Application.Services.TrackingService>();
 builder.Services.AddScoped<Domain.Interfaces.IShipmentRepository, Infrastructure.Repositories.ShipmentRepository>();
 builder.Services.AddScoped<Domain.Interfaces.IRecipientRepository, Infrastructure.Repositories.RecipientRepository>();
+
+builder.Services.AddScoped<Application.Interfaces.IRecipientService, Application.Services.RecipientService>();
+
 builder.Services.AddScoped<Domain.Interfaces.IUsuarioRepository, Infrastructure.Repositories.UsuarioRepository>();
+builder.Services.AddScoped<Domain.Interfaces.IAdminRepository, Infrastructure.Repositories.AdminRepository>();
+builder.Services.AddScoped<Application.Interfaces.IAdminService, Application.Services.AdminService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<Domain.Interfaces.IUserContext, Infrastructure.Services.UserContext>();
 builder.Services.AddScoped<Domain.Interfaces.IDriverRepository, Infrastructure.Repositories.DriverRepository>();
 
 builder.Services.AddScoped<Domain.Interfaces.ITokenService, Infrastructure.Security.TokenService>();
-builder.Services.AddScoped<Application.Services.IShipmentService, Application.Services.ShipmentService>();
+
+builder.Services.AddScoped<Domain.Interfaces.ICompanyRepository, Infrastructure.Repositories.CompanyRepository>();
+builder.Services.AddScoped<Application.Interfaces.ICompanyService, Application.Services.CompanyService>();
+
+builder.Services.AddScoped<Application.Interfaces.IShipmentService, Application.Services.ShipmentService>();
 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -41,6 +56,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true
         };
     });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("SoloAdminMaster", policy =>
+    {
+        // Exige que el token tenga el claim "esMaster" con valor "true"
+        policy.RequireClaim("esMaster", "true", "True");
+    });
+});
 
 
 builder.Services.AddControllers()

@@ -29,6 +29,10 @@ namespace Domain.Interfaces
         Task<Envio?> ObtenerPorId(int id);
         Task<Envio> Actualizar(Envio envio);
         Task<bool> ExistePiloto(int pilotoId);
+        Task<Envio?> ObtenerConDetallesAsync(int id);
+        Task<List<Envio>> ObtenerEnviosConDetallesPorEmpresaAsync(int empresaId);
 
+        Task<List<Envio>> ObtenerReportePorEstadoAsync(int? statusId);
+        Task<List<Envio>> ObtenerTodosAdminAsync(int? distritoId = null);
     }
 }
