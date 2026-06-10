@@ -96,7 +96,6 @@ namespace API.Controllers
         /// </remarks>
 
         [HttpGet("assigned-shipments")]
-        [HttpGet("my-shipments")]
 
         [Authorize(Roles = "Piloto")]
         public async Task<IActionResult> GetMyShipments()
