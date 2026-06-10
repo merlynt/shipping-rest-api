@@ -185,6 +185,7 @@ namespace Application.Services
             }
 
             await _shipmentRepository.ActualizarAsync(envio);
+            envio = await _shipmentRepository.ObtenerPorId(envio.Id) ?? envio;
 
             return new EnvioResponseDto
             {
@@ -218,6 +219,7 @@ namespace Application.Services
 
             envio.EstadoId = dto.EstadoId;
             await _shipmentRepository.ActualizarAsync(envio);
+            envio = await _shipmentRepository.ObtenerPorId(envio.Id) ?? envio;
 
             return new EnvioResponseDto
             {
@@ -244,6 +246,7 @@ namespace Application.Services
 
             envio.EstadoId = EstadosEnvios.EnBodega;
             await _shipmentRepository.ActualizarAsync(envio);
+            envio = await _shipmentRepository.ObtenerPorId(envio.Id) ?? envio;
 
             return new EnvioResponseDto
             {
