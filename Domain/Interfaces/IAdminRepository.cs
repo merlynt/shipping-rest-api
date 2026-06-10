@@ -11,5 +11,6 @@ namespace Domain.Interfaces
         // Estos son los que faltaban para el AdminService
         Task<Administrador?> GetByIdAsync(int id);
         Task ActualizarAdministrador(Administrador administrador);
+        Task<Administrador?> ObtenerPorUsuarioIdAsync(int usuarioId);
     }
 }

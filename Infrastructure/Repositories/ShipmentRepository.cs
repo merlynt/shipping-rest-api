@@ -116,6 +116,7 @@ namespace Infrastructure.Repositories
         public async Task<Envio?> ObtenerConDetallesAsync(int id)
         {
             return await _context.Envios
+                .Include(e => e.Estado)
                 .Include(e => e.Destinatario)
                     .ThenInclude(d => d.Distrito)
                         .ThenInclude(dist => dist.Departamento)
@@ -150,6 +151,29 @@ namespace Infrastructure.Repositories
             }
 
             return await query.ToListAsync();
+        }
+
+        /// <summary>
+        /// Obtiene todos los envíos - Solo para Admin
+        /// </summary>
+        public async Task<List<Envio>> ObtenerTodosAdminAsync(int? distritoId = null)
+        {
+            var query = _context.Envios
+                .IgnoreQueryFilters()
+                .Include(e => e.Estado)
+                .Include(e => e.Destinatario)
+                .Include(e => e.Empresa)
+                .Include(e => e.Piloto)
+                .AsQueryable();
+
+            // Si distritoId tiene valor, filtra por empresas en ese distrito
+            // Si es null, devuelve todos (para Super Admin)
+            if (distritoId.HasValue)
+            {
+                query = query.Where(e => e.Destinatario != null && e.Destinatario.DistritoId == distritoId.Value);
+            }
+
+            return await query.OrderByDescending(e => e.Id).ToListAsync();
         }
     }
 }

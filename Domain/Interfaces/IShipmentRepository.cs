@@ -33,6 +33,6 @@ namespace Domain.Interfaces
         Task<List<Envio>> ObtenerEnviosConDetallesPorEmpresaAsync(int empresaId);
 
         Task<List<Envio>> ObtenerReportePorEstadoAsync(int? statusId);
-
+        Task<List<Envio>> ObtenerTodosAdminAsync(int? distritoId = null);
     }
 }

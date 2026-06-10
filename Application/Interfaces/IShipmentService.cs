@@ -28,5 +28,6 @@ namespace Application.Interfaces
         Task<EnvioResponseDto?> ActualizarShipmentAsync(int id, UpdateShipmentDto dto);
         Task<EnvioResponseDto?> CambiarEstadoAsync(int id, UpdateShipmentStatusDto dto);
         Task<EnvioResponseDto?> MarcarEnBodegaAsync(int id);
+        Task<List<ShipmentAdminDto>> ObtenerTodosAdminAsync(int usuarioId);
     }
 }

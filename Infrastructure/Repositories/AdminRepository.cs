@@ -81,5 +81,14 @@ namespace Infrastructure.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<Administrador?> ObtenerPorUsuarioIdAsync(int usuarioId)
+        {
+            return await _context.Administradores
+                .Include(a => a.Distrito)
+                .Include(a => a.Usuario)
+                    .ThenInclude(u => u.Rol)
+                .FirstOrDefaultAsync(a => a.UsuarioId == usuarioId);
+        }
     }
 }

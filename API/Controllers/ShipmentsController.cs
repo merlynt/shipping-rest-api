@@ -1,10 +1,11 @@
-﻿using System.Security.Claims;
-using Application.DTOS;
+﻿using Application.DTOS;
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Interfaces;
+using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace API.Controllers
 {
@@ -48,7 +49,7 @@ namespace API.Controllers
 
 
         /// <summary>
-        /// Obtiene el historial completo de todos los envíos realizados.
+        /// Para Empresa. Obtiene el historial completo de todos los envíos realizados.
         /// </summary>
         /// <remarks>
         /// **Rol Requerido:** Empresa.
@@ -64,9 +65,50 @@ namespace API.Controllers
             return Ok(envios);
         }
 
+        /// <summary>
+        /// Para Admin. Obtiene la lista de TODOS los envíos del sistema.
+        /// - Super Admin (EsMaster = true): Ve TODOS los envíos
+        /// - Admin Departamental (EsMaster = false): Ve solo envíos de su distrito
+        /// </summary>
+        /// <remarks>
+        /// **Rol Requerido:** Administrador.
+        /// El filtrado se realiza automáticamente según el tipo de administrador.
+        /// </remarks>
+        [HttpGet("admin/all")]
+        [Authorize(Roles = "Administrador")]
+        public async Task<IActionResult> ObtenerTodosAdmin()
+        {
+            try
+            {
+                var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var usuarioId))
+                    return Unauthorized(new { error = "Token inválido o ausente." });
+
+                // ← PASAR el usuarioId aquí
+                var envios = await _shipmentService.ObtenerTodosAdminAsync(usuarioId);
+                
+                return Ok(new
+                {
+                    total = envios.Count,
+                    datos = envios
+                });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { error = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new
+                {
+                    error = "Ocurrió un error interno al obtener la lista de envíos."
+                });
+            }
+        }
 
         /// <summary>
-        /// Rastrea el estado y detalle de un envío específico mediante su código de seguimiento.
+        /// Para Empresa. Rastrea el estado y detalle de un envío específico mediante su código de seguimiento.
         /// </summary>
         /// <remarks>
         /// **Rol Requerido:** Empresa.
@@ -88,7 +130,7 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// Obtiene la lista de envíos asignados al piloto (conductor) autenticado.
+        /// Para Piloto. Obtiene la lista de envíos asignados al piloto (conductor) autenticado.
         /// </summary>
         /// <remarks>
         /// **Rol Requerido:** Piloto.
@@ -101,7 +143,7 @@ namespace API.Controllers
         [Authorize(Roles = "Piloto")]
         public async Task<IActionResult> GetMyShipments()
         {
-  
+
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var usuarioId))
@@ -118,8 +160,11 @@ namespace API.Controllers
             }
         }
         /// <summary>
-        /// Para rol piloto y marca un envío como entregado usando su Código
+        /// Para Piloto. Marca un envío como entregado usando su Código
         /// </summary>
+        /// <remarks>
+        /// **Rol Requerido:** Piloto.
+        /// </remarks>
         [HttpPatch("{codigoTracking}/deliver")]
         [Authorize(Roles = "Piloto")]
         public async Task<IActionResult> Deliver(string codigoTracking, [FromBody] DeliverShipmentDto dto)
@@ -151,7 +196,7 @@ namespace API.Controllers
 
         [HttpPatch("{codigoTracking}/return")]
         [Authorize(Roles = "Piloto")]
-     
+
         public async Task<IActionResult> ReturnShipment(string codigoTracking, [FromBody] ReturnShipmentDto dto)
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -180,8 +225,11 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// Para rol piloto. Obtiene el detalle completo de un envío asignado por su ID.
+        /// Para Piloto. Obtiene el detalle completo de un envío asignado por su ID.
         /// </summary>
+        /// <remarks>
+        /// **Rol Requerido:** Piloto.
+        /// </remarks>
         [HttpGet("{id:int}")]
         [Authorize(Roles = "Piloto")] // Asegúrate de usar el nombre exacto de tu rol
         public async Task<IActionResult> GetShipmentDetail(int id)
@@ -208,8 +256,11 @@ namespace API.Controllers
 
 
         /// <summary>
-        /// Edita los datos de un shipment por ID (dirección, peso, etc.)
+        /// Para Admin. Edita los datos de un shipment por ID (dirección, peso, etc.)
         /// </summary>
+        /// <remarks>
+        /// **Rol Requerido:** Administrador.
+        /// </remarks>
         [HttpPut("{id}")]
         [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateShipmentDto dto)
@@ -229,8 +280,11 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// Cambia el estado de un shipment (Recolectado, En bodega, En ruta, Entregado, Devolución)
+        /// Para Admin. Cambia el estado de un shipment (Recolectado, En bodega, En ruta, Entregado, Devolución)
         /// </summary>
+        /// <remarks>
+        /// **Rol Requerido:** Administrador.
+        /// </remarks>
         [HttpPatch("{id}/status")]
         [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateShipmentStatusDto dto)
@@ -250,8 +304,11 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// Marca un shipment como "En Bodega" (solo Administrador departamental)
+        /// Para Admin. Marca un shipment como "En Bodega" (solo Administrador departamental)
         /// </summary>
+        /// <remarks>
+        /// **Rol Requerido:** Administrador.
+        /// </remarks>
         [HttpPatch("{id}/warehouse")]
         [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> MarkAsWarehouse(int id)
@@ -270,5 +327,6 @@ namespace API.Controllers
             }
         }
 
+      
     }
 }

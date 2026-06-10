@@ -62,5 +62,31 @@ namespace Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task<Empresa?> ObtenerPorIdAsync(int id)
+        {
+            return await _context.Empresas
+                .Include(e => e.Distrito)
+                .FirstOrDefaultAsync(e => e.Id == id && e.Activo);
+        }
+
+        public async Task<List<Empresa>> ObtenerTodasAsync()
+        {
+            return await _context.Empresas
+                .Include(e => e.Distrito)
+                    .ThenInclude(d => d.Departamento)
+                .Include(e => e.Usuario)
+                    .ThenInclude(u => u.Rol)
+                .ToListAsync();
+        }
+
+        public async Task<Empresa?> ObtenerPorIdConDetallesAsync(int id)
+        {
+            return await _context.Empresas
+                .Include(e => e.Distrito)
+                    .ThenInclude(d => d.Departamento)
+                .Include(e => e.Usuario)
+                .ThenInclude(u => u.Rol)
+                .FirstOrDefaultAsync(e => e.Id == id && e.Activo);
+        }
     }
 }

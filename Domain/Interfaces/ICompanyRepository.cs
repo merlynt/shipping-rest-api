@@ -10,5 +10,8 @@ namespace Domain.Interfaces
         Task<Empresa> CrearEmpresa(Empresa empresa, Usuario usuario);
         Task<Empresa?> ObtenerPorIdConUsuarioAsync(int id);
         Task ActualizarEmpresaAsync(Empresa empresa);
+        Task<Empresa?> ObtenerPorIdAsync(int id);
+        Task<List<Empresa>> ObtenerTodasAsync();  
+        Task<Empresa?> ObtenerPorIdConDetallesAsync(int id); 
     }
 }

@@ -16,12 +16,19 @@ namespace Application.Services
         private readonly IShipmentRepository _shipmentRepository;
         private readonly ITrackingService _trackingService;
         private readonly ICompanyRepository _companyRepository;
+        // Inyecta el repositorio de Administrador
+        private readonly IAdminRepository _adminRepository;
 
-        public ShipmentService(IShipmentRepository shipmentRepository, ITrackingService trackingService, ICompanyRepository companyRepository)
+        public ShipmentService(
+            IShipmentRepository shipmentRepository, 
+            ITrackingService trackingService, 
+            ICompanyRepository companyRepository,
+            IAdminRepository adminRepository)  // ← NUEVO
         {
             _shipmentRepository = shipmentRepository;
             _trackingService = trackingService;
             _companyRepository = companyRepository;
+            _adminRepository = adminRepository;  // ← NUEVO
         }
 
         async Task<IEnumerable<DriverShipmentResponseDto>> IShipmentService.GetMyShipmentsAsync(int usuarioId)
@@ -292,5 +299,31 @@ namespace Application.Services
             }).ToList();
         }
 
+        public async Task<List<ShipmentAdminDto>> ObtenerTodosAdminAsync(int usuarioId)
+        {
+            // Obtener el admin logeado
+            var admin = await _adminRepository.ObtenerPorUsuarioIdAsync(usuarioId)
+                ?? throw new UnauthorizedAccessException("No se encontró un perfil de administrador para este usuario.");
+
+            // Si es Master, pasar null (ver todos)
+            // Si es Admin Departamental, pasar su DistritoId
+            int? distritoId = admin.EsMaster ? null : admin.DistritoId;
+
+            var envios = await _shipmentRepository.ObtenerTodosAdminAsync(distritoId);
+
+            return envios.Select(e => new ShipmentAdminDto
+            {
+                Id = e.Id,
+                CodigoTracking = e.CodigoTracking,
+                EmpresaNombre = e.Empresa?.NombreEmpresa ?? "Desconocida",
+                DestinatarioNombre = $"{e.Destinatario?.Nombre} {e.Destinatario?.Apellido}".Trim(),
+                EstadoNombre = e.Estado?.Nombre ?? "Sin Estado",
+                PilotoNombre = e.Piloto?.Nombre ?? "No asignado",
+                Peso = e.Peso,
+                Descripcion = e.Descripcion,
+                FechaAsignacion = e.FechaAsignacion,
+                MotivoDevolucion = e.MotivoDevolucion
+            }).ToList();
+        }
     }
 }
