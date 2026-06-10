@@ -185,6 +185,7 @@ namespace Application.Services
             }
 
             await _shipmentRepository.ActualizarAsync(envio);
+            envio = await _shipmentRepository.ObtenerPorId(envio.Id) ?? envio;
 
             return new EnvioResponseDto
             {
@@ -195,7 +196,8 @@ namespace Application.Services
                 EstadoNombre = envio.Estado?.Nombre ?? "Sin Estado",
                 DestinatarioNombre = $"{envio.Destinatario?.Nombre} {envio.Destinatario?.Apellido}",
                 DestinatarioTelefono = envio.Destinatario?.Telefono ?? "",
-                DestinatarioDireccion = envio.Destinatario?.Direccion ?? ""
+                DestinatarioDireccion = envio.Destinatario?.Direccion ?? "",
+                NombrePiloto = envio.Piloto != null ? envio.Piloto.Nombre : "No asignado"
             };
         }
 
@@ -217,6 +219,7 @@ namespace Application.Services
 
             envio.EstadoId = dto.EstadoId;
             await _shipmentRepository.ActualizarAsync(envio);
+            envio = await _shipmentRepository.ObtenerPorId(envio.Id) ?? envio;
 
             return new EnvioResponseDto
             {
@@ -227,7 +230,8 @@ namespace Application.Services
                 EstadoNombre = envio.Estado?.Nombre ?? "Sin Estado",
                 DestinatarioNombre = $"{envio.Destinatario?.Nombre} {envio.Destinatario?.Apellido}",
                 DestinatarioTelefono = envio.Destinatario?.Telefono ?? "",
-                DestinatarioDireccion = envio.Destinatario?.Direccion ?? ""
+                DestinatarioDireccion = envio.Destinatario?.Direccion ?? "",
+                NombrePiloto = envio.Piloto != null ? envio.Piloto.Nombre : "No asignado"
             };
         }
 
@@ -242,6 +246,7 @@ namespace Application.Services
 
             envio.EstadoId = EstadosEnvios.EnBodega;
             await _shipmentRepository.ActualizarAsync(envio);
+            envio = await _shipmentRepository.ObtenerPorId(envio.Id) ?? envio;
 
             return new EnvioResponseDto
             {
@@ -252,7 +257,8 @@ namespace Application.Services
                 EstadoNombre = envio.Estado?.Nombre ?? "Sin Estado",
                 DestinatarioNombre = $"{envio.Destinatario?.Nombre} {envio.Destinatario?.Apellido}",
                 DestinatarioTelefono = envio.Destinatario?.Telefono ?? "",
-                DestinatarioDireccion = envio.Destinatario?.Direccion ?? ""
+                DestinatarioDireccion = envio.Destinatario?.Direccion ?? "",
+                NombrePiloto = envio.Piloto != null ? envio.Piloto.Nombre : "No asignado"
             };
         }
         public async Task<DriverShipmentDetail> ObtenerDetalleEnvioParaDriverAsync(int shipmentId, int usuarioId)
